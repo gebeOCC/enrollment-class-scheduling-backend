@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreign('enrolled_students_id')->references('id')->on('enrolled_students')->onDelete('cascade');
             $table->unsignedBigInteger('year_section_subjects_id');
             $table->foreign('year_section_subjects_id')->references('id')->on('year_section_subjects')->onDelete('cascade');
+            $table->unsignedBigInteger('subject_id');
+            $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
             $table->timestamps();
         });
     }

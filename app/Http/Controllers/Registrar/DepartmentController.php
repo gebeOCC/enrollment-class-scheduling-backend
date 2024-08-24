@@ -49,4 +49,7 @@ class DepartmentController extends Controller
         return response(["message" => "success", "department" =>  $departments]);
     }
 
+    public function getDepartments() {
+        return Department::select('id', 'department_name_abbreviation')->get();
+    }
 }
