@@ -7,6 +7,8 @@ use App\Http\Controllers\Registrar\DepartmentController;
 use App\Http\Controllers\Registrar\RoomController;
 use App\Http\Controllers\Registrar\FacultyController;
 use App\Http\Controllers\Registrar\StudentController;
+use App\Http\Controllers\All\SemesterController;
+use App\Http\Controllers\All\SchoolYearController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -15,6 +17,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('add-department', [DepartmentController::class, 'addDepartment']);
 Route::get('get-departments-courses', [DepartmentController::class, 'getDepartmentsCourses']);
 Route::get('get-departments', [DepartmentController::class, 'getDepartments']);
+Route::post('assign-program-head', [DepartmentController::class, 'assignProgramHead']);
+Route::post('assign-new-program-head', [DepartmentController::class, 'assignNewProgramHead']);
 
 Route::post('add-course', [DepartmentController::class, 'addCourse']);
 
@@ -29,13 +33,10 @@ Route::post('add-faculty', [FacultyController::class, 'addFaculty']);
 Route::get('get-student-list', [StudentController::class, 'getStudentList']);
 Route::post('add-student', [StudentController::class, 'addStudent']);
 
-Route::get('get-drivers', [DriverController::class, 'getDrivers']);
-Route::post('add-driver', [DriverController::class, 'addDriver']);
-Route::get('get-driver-profile/{id}', [DriverController::class, 'getDriverProfile']);
-Route::get('get-driver-credentials/{id}', [DriverController::class, 'getDriverCredentials']);
-Route::get('get-driver-info/{id}', [DriverController::class, 'getDriverInfo']);
-Route::post('update-driver-profile/{id}', [DriverController::class, 'updateDriverProfile']);
-Route::post('update-driver-info/{id}', [DriverController::class, 'updateDriverInfo']);
-Route::post('update-driver-credentials/{id}', [DriverController::class, 'updateDriverCredentials']);
-Route::get('driver-travels/{id}', [DriverController::class, 'getDriverTravels']);
-Route::get('travel-details/{id}', [DriverController::class, 'travelDetails']);
+Route::get('get-semesters', [SemesterController::class, 'getSemesters']);
+Route::get('get-school-years', [SchoolYearController::class, 'getSchoolYears']);
+Route::get('get-school-year-details/{schoolYear}/{semester}', [SchoolYearController::class, 'getSchoolYearDetails']);
+Route::post('add-school-year', [SchoolYearController::class, 'addSchoolYear']);
+Route::post('stop-enrollment/{id}', [SchoolYearController::class, 'stopEnrollment']);
+Route::post('start-enrollment/{id}', [SchoolYearController::class, 'startEnrollment']);
+Route::post('resume-enrollment/{id}', [SchoolYearController::class, 'resumeEnrollment']);

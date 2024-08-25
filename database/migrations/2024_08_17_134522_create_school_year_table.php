@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('school_year', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('semester_id');
-            $table->foreign('semester_id')->references('id')->on('course')->onDelete('cascade');
+            $table->foreign('semester_id')->references('id')->on('semester')->onDelete('cascade');
             $table->string('school_year');
-            $table->enum('enrollment_status', ['ongoing', 'ended']);
+            $table->enum('enrollment_status', ['ongoing', 'ended'])->nullable();
             $table->timestamps();
         });
     }
