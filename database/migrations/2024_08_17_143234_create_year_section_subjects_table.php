@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('year_section_id');
             $table->foreign('year_section_id')->references('id')->on('year_section')->onDelete('cascade');
-            $table->string('faculty_id');
-            $table->foreign('faculty_id')->references('user_id_no')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('faculty_id');
+            $table->foreign('faculty_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('room_id');
             $table->foreign('room_id')->references('id')->on('rooms')->onDelete('cascade');
             $table->unsignedBigInteger('subject_id');

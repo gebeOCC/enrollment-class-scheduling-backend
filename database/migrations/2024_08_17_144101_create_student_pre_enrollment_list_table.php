@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('student_pre_enrollment_list', function (Blueprint $table) {
             $table->id();
-            $table->string('student_id_no');
-            $table->foreign('student_id_no')->references('user_id_no')->on('users')->onDelete('cascade');
-            $table->string('student_application_no');
-            $table->foreign('student_application_no')->references('application_no')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('student_id');
+            $table->foreign('student_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('school_year_id');
             $table->foreign('school_year_id')->references('id')->on('school_year')->onDelete('cascade');
             $table->unsignedBigInteger('student_type_id');

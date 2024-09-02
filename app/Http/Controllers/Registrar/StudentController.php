@@ -11,10 +11,17 @@ class StudentController extends Controller
 {
     public function getStudentList()
     {
-        return User::select('id', 'user_id_no', 'email_address', 'contact_number')
-            ->selectRaw('CONCAT(first_name, " ", middle_name, " ", last_name) AS full_name')
-            ->where('user_role', '=', 'student')
-            ->get();
+        return User::select(
+            'users.id',
+            'user_id_no',
+            'email_address',
+            'contact_number'
+        )
+        ->selectRaw('CONCAT(user_information.first_name, " ", user_information.middle_name, " ", user_information.last_name) AS full_name')
+        ->join('user_information', 'user_information.user_id', '=', 'users.id')
+        ->where('users.user_role', '=', 'student')
+        ->get();
+
     }
 
     public function addStudent(Request $request) {

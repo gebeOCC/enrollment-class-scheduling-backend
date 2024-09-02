@@ -29,18 +29,31 @@ class DepartmentController extends Controller
     public function getDepartmentsCourses()
     {
         // Select department details and full name of program head if exists
+        // $departments = Department::select(
+        //     'department.id',
+        //     'department.department_name',
+        //     'department.department_name_abbreviation'
+        // )
+        //     // ->selectRaw('CONCAT(COALESCE(user_information.first_name, ""), " ", COALESCE(user_information.middle_name, ""), " ", COALESCE(user_information.last_name, "")) AS full_name')
+        //     // ->join('faculty', 'department.id', '=', 'faculty.department_id')
+        //     // ->join('users', 'users.id', '=', 'faculty.faculty_id')
+        //     // ->join('user_information', 'users.id', '=', 'user_information.user_id')
+        //     // ->where('users.user_role', '=', 'program_head')
+        //     ->with(['courses' => function ($query) {
+        //         $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
+        //     }])
+        //     ->get();
+
         $departments = Department::select(
             'department.id',
             'department_name',
-            'department_name_abbreviation',
-            'user_id_no'
+            'department_name_abbreviation'
         )
-            ->selectRaw('CONCAT(COALESCE(first_name, ""), " ", COALESCE(middle_name, ""), " ", COALESCE(last_name, "")) AS full_name')
-            ->leftJoin('faculty_role', function ($join) {
-                $join->on('department.id', '=', 'faculty_role.department_id')
-                    ->where('faculty_role.faculty_role', '=', 'program_head');
-            })
-            ->leftJoin('users', 'faculty_role.faculty_id_no', '=', 'users.user_id_no')
+            ->selectRaw('CONCAT(COALESCE(user_information.first_name, ""), " ", COALESCE(user_information.middle_name, ""), " ", COALESCE(user_information.last_name, "")) AS full_name')
+            ->join('faculty', 'faculty.department_id', '=', 'department.id')
+            ->join('users', 'users.id', '=', 'faculty.faculty_id')
+            ->join('user_information', 'users.id', '=', 'user_information.user_id')
+            ->where('users.user_role', '=', 'program_head')
             ->with(['Course' => function ($query) {
                 $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
             }])
@@ -48,6 +61,8 @@ class DepartmentController extends Controller
 
         return response()->json($departments);
     }
+
+
 
 
     public function addCourse(Request $request)

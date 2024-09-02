@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('faculty_role', function (Blueprint $table) {
+        Schema::create('faculty', function (Blueprint $table) {
             $table->id();
-            $table->string('faculty_id_no');
-            $table->foreign('faculty_id_no')->references('user_id_no')->on('users')->onDelete('cascade');
-            $table->unsignedBigInteger('department_id')->nullable();
+            $table->unsignedBigInteger('faculty_id');
+            $table->foreign('faculty_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('department_id');
             $table->foreign('department_id')->references('id')->on('department')->onDelete('cascade');
-            $table->enum('faculty_role', ['program_head', 'registrar'])->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('faculty_role');
+        Schema::dropIfExists('faculty');
     }
 };
