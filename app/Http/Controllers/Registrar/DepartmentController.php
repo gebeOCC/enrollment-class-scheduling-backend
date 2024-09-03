@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Department;
 use App\Models\Course;
-use App\Models\User;
 use App\Models\FacultyRole;
 
 class DepartmentController extends Controller
@@ -28,42 +27,25 @@ class DepartmentController extends Controller
 
     public function getDepartmentsCourses()
     {
-        // Select department details and full name of program head if exists
-        // $departments = Department::select(
-        //     'department.id',
-        //     'department.department_name',
-        //     'department.department_name_abbreviation'
-        // )
-        //     // ->selectRaw('CONCAT(COALESCE(user_information.first_name, ""), " ", COALESCE(user_information.middle_name, ""), " ", COALESCE(user_information.last_name, "")) AS full_name')
-        //     // ->join('faculty', 'department.id', '=', 'faculty.department_id')
-        //     // ->join('users', 'users.id', '=', 'faculty.faculty_id')
-        //     // ->join('user_information', 'users.id', '=', 'user_information.user_id')
-        //     // ->where('users.user_role', '=', 'program_head')
-        //     ->with(['courses' => function ($query) {
-        //         $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
-        //     }])
-        //     ->get();
-
         $departments = Department::select(
             'department.id',
             'department_name',
             'department_name_abbreviation'
         )
             ->selectRaw('CONCAT(COALESCE(user_information.first_name, ""), " ", COALESCE(user_information.middle_name, ""), " ", COALESCE(user_information.last_name, "")) AS full_name')
-            ->join('faculty', 'faculty.department_id', '=', 'department.id')
-            ->join('users', 'users.id', '=', 'faculty.faculty_id')
+            ->join('faculty', 'department.id', '=', 'faculty.department_id')
+            ->join('users', 'faculty.faculty_id', '=', 'users.id')
             ->join('user_information', 'users.id', '=', 'user_information.user_id')
             ->where('users.user_role', '=', 'program_head')
+            ->groupBy('department.id', 'department_name', 'department_name_abbreviation', 'user_information.first_name', 'user_information.middle_name', 'user_information.last_name')
+            ->orderBy('department.id')
             ->with(['Course' => function ($query) {
                 $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
             }])
             ->get();
 
-        return response()->json($departments);
+        return response($departments);
     }
-
-
-
 
     public function addCourse(Request $request)
     {

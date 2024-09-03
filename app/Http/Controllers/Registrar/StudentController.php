@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Registrar;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserInformation;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -25,9 +27,15 @@ class StudentController extends Controller
     }
 
     public function addStudent(Request $request) {
-        
-        User::create([
+
+        $user = User::create([
             'user_id_no' => $request->user_id_no,
+            'password' => Hash::make($request->password),
+            'user_role' => $request->user_role,
+        ]);
+
+        UserInformation::create([
+            'user_id' => $user->id,
             'password' => Hash::make($request->password),
             'user_role' => $request->user_role,
             'first_name' => $request->first_name,
@@ -42,6 +50,5 @@ class StudentController extends Controller
         ]);
 
         return response(["message" => "success"]);
-
     }
 }

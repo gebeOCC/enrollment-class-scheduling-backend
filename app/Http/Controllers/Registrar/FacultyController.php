@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\FacultyRole;
+use App\Models\UserInformation;
+use App\Models\Faculty;
 use Illuminate\Support\Facades\Hash;
 
 class FacultyController extends Controller
@@ -23,8 +24,14 @@ class FacultyController extends Controller
 
     public function addFaculty(Request $request)
     {
-        User::create([
+        $user = User::create([
             'user_id_no' => $request->user_id_no,
+            'password' => Hash::make($request->password),
+            'user_role' => $request->user_role,
+        ]);
+
+        UserInformation::create([
+            'user_id' => $user->id,
             'password' => Hash::make($request->password),
             'user_role' => $request->user_role,
             'first_name' => $request->first_name,
@@ -38,8 +45,8 @@ class FacultyController extends Controller
             'zip_code' => $request->zip_code,
         ]);
 
-        FacultyRole::create([
-            'faculty_id_no' => $request->user_id_no,
+        Faculty::create([
+            'faculty_id' => $user->id,
             'department_id' => $request->department_id,
         ]);
 
