@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cookie;
@@ -35,9 +34,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $request->user()->tokens()->delete();
+
         $cookie = Cookie::forget('token');
 
-        Auth::user();
         return response([
             'message' => 'success'
         ])->withCookie($cookie);

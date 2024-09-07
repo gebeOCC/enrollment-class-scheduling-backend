@@ -23,27 +23,9 @@ return new class extends Migration
         });
 
         DB::table('users')->insert([
-            'user_id_no' => '1',
-            'password' => Hash::make('password'),
+            'user_id_no' => 'registrar',
+            'password' => Hash::make('registrar'),
             'user_role' => 'registrar',
-        ]);
-
-        DB::table('users')->insert([
-            'user_id_no' => '2',
-            'password' => Hash::make('password'),
-            'user_role' => 'program_head',
-        ]);
-
-        DB::table('users')->insert([
-            'user_id_no' => '3',
-            'password' => Hash::make('password'),
-            'user_role' => 'program_head',
-        ]);
-
-        DB::table('users')->insert([
-            'user_id_no' => '4',
-            'password' => Hash::make('password'),
-            'user_role' => 'program_head',
         ]);
     } 
 
