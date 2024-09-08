@@ -11,7 +11,8 @@ use App\Http\Controllers\Registrar\StudentController;
 use App\Http\Controllers\All\SemesterController;
 use App\Http\Controllers\All\SchoolYearController;
 use App\Http\Controllers\ProgramHead\CourseController;
-
+use App\Http\Controllers\All\YearLevelController;
+use App\Http\Controllers\ProgramHead\CurriculumController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -32,6 +33,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-course-curriculums/{courseid}', [CourseController::class, 'getCourseCurriculums']);
     Route::get('get-course-name/{courseid}', [CourseController::class, 'getCourseName']);
     Route::post('add-course-curriculum/{courseid}', [CourseController::class, 'addCourseCurriculum']);
+
+    Route::get('get-year-levels', [YearLevelController::class, 'getYearLevels']);
+    Route::get('get-curriculum-terms-subjects/{courseid}/{schoolyear}', [CurriculumController::class, 'getCurriculumTermsSubjects']);
 
     Route::post('add-course', [DepartmentController::class, 'addCourse']);
 

@@ -13,8 +13,8 @@ class Subject extends Model
     protected $fillable = [
         'subject_code',
         'descriptive_title',
-        'subject_type',
-        'department_id',
-        'department_id',
+        'credit_units',
+        'lecture_hours',
+        'laboratory_hours',
     ];
 }

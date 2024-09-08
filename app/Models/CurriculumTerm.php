@@ -11,8 +11,13 @@ class CurriculumTerm extends Model
 
     protected $table = 'curriculum_term';
     protected $fillable = [
-        'currriculum_id',
+        'curriculum_id',
         'year_level_id',
         'semester_id',
     ];
+
+    public function CurriculumTermSubject()
+    {
+        return $this->hasMany(CurriculumTermSubject::class, 'curriculum_term_id');
+    }
 }

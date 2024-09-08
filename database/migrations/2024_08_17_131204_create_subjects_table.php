@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('subject_code');
             $table->string('descriptive_title');
-            $table->enum('subject_type', ['major', 'minor']);
-            $table->unsignedBigInteger('department_id');
-            $table->foreign('department_id')->references('id')->on('department')->onDelete('cascade');
+            $table->integer('credit_units');
+            $table->integer('lecture_hours');
+            $table->integer('laboratory_hours')->default(0);
             $table->timestamps();
         });
     }

@@ -14,8 +14,5 @@ class CurriculumTermSubject extends Model
         'curriculum_term_id',
         'subject_id',
         'credit_units',
-        'lecture_hours',
-        'laboratory_hours',
-        'credit_units',
     ];
 }

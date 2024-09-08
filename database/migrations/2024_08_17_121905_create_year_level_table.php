@@ -15,11 +15,29 @@ return new class extends Migration
         Schema::create('year_level', function (Blueprint $table) {
             $table->id();
             $table->string('year_level');
+            $table->string('year_level_name');
             $table->timestamps();
         });
-        foreach (range(1, 4) as $level) {
-            YearLevel::create(['year_level' => $level]);
-        }
+
+        YearLevel::create([
+            'year_level' => 1,
+            'year_level_name' => 'First Year',
+        ]);
+
+        YearLevel::create([
+            'year_level' => 2,
+            'year_level_name' => 'Second Year',
+        ]);
+
+        YearLevel::create([
+            'year_level' => 3,
+            'year_level_name' => 'Third Year',
+        ]);
+
+        YearLevel::create([
+            'year_level' => 4,
+            'year_level_name' => 'Fourth Year',
+        ]);
     }
 
     /**

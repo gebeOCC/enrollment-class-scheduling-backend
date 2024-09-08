@@ -55,8 +55,8 @@ class CourseController extends Controller
             ->select('id')
             ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
             ->first()->id;
-
-        Curriculum::create([
+        
+        $curriculum = Curriculum::create([
             'course_id' => $courseId,
             'school_year_id' => $request->school_year_id,
         ]);
