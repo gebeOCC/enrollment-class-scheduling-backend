@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('curriculum_term', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('currriculum_id');
+            $table->unsignedBigInteger('curriculum_id');
             $table->foreign('curriculum_id')->references('id')->on('curriculum')->onDelete('cascade');
             $table->unsignedBigInteger('year_level_id');
             $table->foreign('year_level_id')->references('id')->on('year_level')->onDelete('cascade');

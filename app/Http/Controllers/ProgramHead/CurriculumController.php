@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\YearLevel;
 use App\Models\Curriculum;
+use App\Models\CurriculumTerm;
 use App\Models\SchoolYear;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Expr\FuncCall;
 
 class CurriculumController extends Controller
 {
@@ -41,16 +43,42 @@ class CurriculumController extends Controller
             ->where('curriculum.school_year_id', '=', $schoolYearId)
             ->first()->id;
 
-        return YearLevel::select('year_level.id', 'year_level_name')
-        ->with(['CurriculumTerm' => function ($query) use ($curriculumId) {
-            $query->select('curriculum_term.id', 'currriculum_id', 'year_level_id', 'semester_id', 'semester.semester_name')
-            ->join('semester', 'semester.id', '=', 'curriculum_term.semester_id')
-            ->where('curriculum_term.currriculum_id', '=', $curriculumId)
-                ->with(['CurriculumTermSubject' => function ($query) {
-                    $query->select('curriculum_term_subjects.id', 'curriculum_term_subjects.curriculum_term_id', 'subject_id', 'pre_requisite_subject_id', 'credit_units', 'lecture_hours', 'laboratory_hours')
-                    ->join('subjects', 'subjects.id', '=', 'curriculum_term_subjects.subject_id');
-                }]);
-        }])
-        ->get();
+        $yearLevels = YearLevel::select('year_level.id', 'year_level_name')
+            ->with(['CurriculumTerm' => function ($query) use ($curriculumId) {
+                $query->select('curriculum_term.id', 'curriculum_id', 'year_level_id', 'semester_id', 'semester.semester_name')
+                    ->join('semester', 'semester.id', '=', 'curriculum_term.semester_id')
+                    ->where('curriculum_term.curriculum_id', '=', $curriculumId)
+                    ->with(['CurriculumTermSubject' => function ($query) {
+                        $query->select(
+                            'curriculum_term_subjects.id',
+                            'curriculum_term_subjects.curriculum_term_id',
+                            'curriculum_term_subjects.subject_id',
+                            'curriculum_term_subjects.pre_requisite_subject_id',
+                            'subjects.credit_units',
+                            'subjects.lecture_hours',
+                            'subjects.laboratory_hours',
+                            'subjects.subject_code',
+                            'subjects.descriptive_title',
+                            'pre_req_subjects.subject_code AS pre_requisite_subject_code'
+                        )
+                            ->join('subjects', 'subjects.id', '=', 'curriculum_term_subjects.subject_id')
+                            ->leftJoin('subjects AS pre_req_subjects', 'pre_req_subjects.id', '=', 'curriculum_term_subjects.pre_requisite_subject_id')
+                            ->get();
+                    }]);
+            }])
+            ->get();
+
+        return response(['yearLevels' => $yearLevels, 'curriculumId' => $curriculumId]);
+    }
+
+    public function addCurriculumTerm(Request $request)
+    {
+        $currTermId = CurriculumTerm::create([
+            'semester_id' => $request->semester_id,
+            'year_level_id' => $request->year_level_id,
+            'curriculum_id' => $request->curriculum_id,
+        ]);
+
+        return response(['message' => 'success', 'currTermId' => $currTermId->id]);
     }
 }

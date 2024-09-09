@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('curriculum_term_id')->references('id')->on('curriculum_term')->onDelete('cascade');
             $table->unsignedBigInteger('subject_id');
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
-            $table->unsignedBigInteger('pre_requisite_subject_id');
+            $table->unsignedBigInteger('pre_requisite_subject_id')->nullable();
             $table->foreign('pre_requisite_subject_id')->references('id')->on('subjects')->onDelete('cascade');
             $table->timestamps();
         });
