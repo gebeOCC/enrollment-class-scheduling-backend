@@ -37,7 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-year-levels', [YearLevelController::class, 'getYearLevels']);
     Route::get('get-curriculum-terms-subjects/{courseid}/{schoolyear}', [CurriculumController::class, 'getCurriculumTermsSubjects']);
     Route::post('add-curriculum-term', [CurriculumController::class, 'addCurriculumTerm']);
-
+    Route::get('get-subjects', [CurriculumController::class, 'getSubjects']);
+    Route::post('add-curr-term-subject', [CurriculumController::class, 'addCurrTermSubject']);
+    
     Route::post('add-course', [DepartmentController::class, 'addCourse']);
 
     Route::post('add-room', [RoomController::class, 'addRoom']);

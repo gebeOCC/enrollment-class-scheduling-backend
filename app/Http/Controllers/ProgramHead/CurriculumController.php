@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\YearLevel;
 use App\Models\Curriculum;
 use App\Models\CurriculumTerm;
+use App\Models\CurriculumTermSubject;
 use App\Models\SchoolYear;
+use App\Models\Subject;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Expr\FuncCall;
 
@@ -80,5 +83,38 @@ class CurriculumController extends Controller
         ]);
 
         return response(['message' => 'success', 'currTermId' => $currTermId->id]);
+    }
+
+    public function getSubjects()
+    {
+        return Subject::select('id', 'subject_code', 'descriptive_title', 'credit_units', 'lecture_hours', 'laboratory_hours')
+            ->get();
+    }
+
+    public function addCurrTermSubject(Request $request)
+    {
+        if ($request->subject_id == null) {
+            $subject = Subject::create([
+                'subject_code' => $request->subject_code,
+                'descriptive_title' => $request->descriptive_title,
+                'credit_units' => $request->credit_units,
+                'lecture_hours' => $request->lecture_hours,
+                'laboratory_hours' => $request->laboratory_hours,
+            ]);
+            CurriculumTermSubject::create([
+                'curriculum_term_id' => $request->curriculum_term_id,
+                'subject_id' => $subject->id,
+                'pre_requisite_subject_id' => $request->pre_requisite_subject_id,
+            ]);
+            return response(['message' => 'success']);
+        } else {
+            CurriculumTermSubject::create([
+                'curriculum_term_id' => $request->curriculum_term_id,
+                'subject_id' => $request->subject_id,
+                'pre_requisite_subject_id' => $request->pre_requisite_subject_id,
+            ]);
+            return response(['message' => 'success']);
+        }
+        // return response(['message' => 'success']);
     }
 }

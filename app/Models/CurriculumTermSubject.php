@@ -13,6 +13,6 @@ class CurriculumTermSubject extends Model
     protected $fillable = [
         'curriculum_term_id',
         'subject_id',
-        'credit_units',
+        'pre_requisite_subject_id',
     ];
 }

@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('subject_code');
             $table->string('descriptive_title');
             $table->integer('credit_units');
-            $table->integer('lecture_hours');
-            $table->integer('laboratory_hours')->default(0);
+            $table->integer('lecture_hours')->nullable();
+            $table->integer('laboratory_hours')->nullable();
             $table->timestamps();
         });
     }
