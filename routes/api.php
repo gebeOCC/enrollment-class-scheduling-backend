@@ -13,6 +13,7 @@ use App\Http\Controllers\All\SchoolYearController;
 use App\Http\Controllers\ProgramHead\CourseController;
 use App\Http\Controllers\All\YearLevelController;
 use App\Http\Controllers\ProgramHead\CurriculumController;
+use App\Http\Controllers\ProgramHead\EnrollmentCourseController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -60,4 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('stop-enrollment/{id}', [SchoolYearController::class, 'stopEnrollment']);
     Route::post('start-enrollment/{id}', [SchoolYearController::class, 'startEnrollment']);
     Route::post('resume-enrollment/{id}', [SchoolYearController::class, 'resumeEnrollment']);
+
+    Route::get('enrollment/{courseid}', [EnrollmentCourseController::class, 'getYearLevelSections']);
+    Route::post('add-new-section', [EnrollmentCourseController::class, 'addNewSection']);
 });

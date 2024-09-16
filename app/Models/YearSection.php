@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\EnrolledStudent;
 
 class YearSection extends Model
 {
@@ -15,5 +16,16 @@ class YearSection extends Model
         'course_id',
         'year_level_id',
         'section',
+        'max_students',
     ];
+
+    public function enrolledStudents()
+    {
+        return $this->hasMany(EnrolledStudent::class, 'year_section_id');
+    }
+
+    public function getStudentCountAttribute()
+    {
+        return $this->enrolledStudents()->count();
+    }
 }

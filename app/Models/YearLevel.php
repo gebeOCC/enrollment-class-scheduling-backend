@@ -20,4 +20,9 @@ class YearLevel extends Model
     {
         return $this->hasMany(CurriculumTerm::class, 'year_level_id');
     }
+
+    public function YearSection()
+    {
+        return $this->hasMany(YearSection::class, 'year_level_id');
+    }
 }

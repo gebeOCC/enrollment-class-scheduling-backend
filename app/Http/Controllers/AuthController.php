@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
+use App\Models\Faculty;
+use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -45,6 +49,33 @@ class AuthController extends Controller
 
     public function user(Request $request)
     {
-        return response()->json(['message' => 'success', 'user_role' => $request->user()->user_role]);
+        $userRole = $request->user()->user_role;
+        $userId = $request->user()->id;
+
+        $enrollmentOngoing = SchoolYear::where('enrollment_status', '=', 'ongoing')->exists();
+
+        $courses = [];
+
+        if ($userRole == 'program_head' && $enrollmentOngoing) {
+            $courses = DB::table('course')
+                ->select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
+                ->join(
+                    'department',
+                    'course.department_id',
+                    '=',
+                    'department.id'
+                )
+                ->join('faculty', 'faculty.department_id', '=', 'department.id')
+                ->join('users', 'faculty.faculty_id', '=', 'users.id')
+                ->where('users.id', '=', $userId)
+                ->get();
+        }
+
+        return response()->json([
+            'message' => 'success',
+            'user_role' => $userRole,
+            'enrollmentOngoing' => $enrollmentOngoing,
+            'courses' => $courses,
+        ]);
     }
 }

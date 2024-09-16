@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('year_level_id');
             $table->foreign('year_level_id')->references('id')->on('year_level')->onDelete('cascade');
             $table->string('section');
+            $table->integer('max_students');
             $table->timestamps();
         });
     }

@@ -26,4 +26,9 @@ class Department extends Model
     {
         return $this->hasMany(Room::class, 'department_id');
     }
+
+    public function Faculty()
+    {
+        return $this->hasMany(Faculty::class, 'department_id');
+    }
 }

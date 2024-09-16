@@ -15,4 +15,9 @@ class Course extends Model
         'course_name',
         'course_name_abbreviation',
     ];
+
+    public function Department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
 }
