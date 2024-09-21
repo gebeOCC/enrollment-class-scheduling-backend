@@ -40,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('add-curriculum-term', [CurriculumController::class, 'addCurriculumTerm']);
     Route::get('get-subjects', [CurriculumController::class, 'getSubjects']);
     Route::post('add-curr-term-subject', [CurriculumController::class, 'addCurrTermSubject']);
-    
+
     Route::post('add-course', [DepartmentController::class, 'addCourse']);
 
     Route::post('add-room', [RoomController::class, 'addRoom']);
@@ -64,4 +64,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('enrollment/{courseid}', [EnrollmentCourseController::class, 'getYearLevelSections']);
     Route::post('add-new-section', [EnrollmentCourseController::class, 'addNewSection']);
+    Route::get('get-department-rooms', [EnrollmentCourseController::class, 'getDepartmentRooms']);
+    Route::get('get-instructors', [EnrollmentCourseController::class, 'getInstructors']);
+    Route::get('get-classes/{course_id}/{year_level_name}/{section}', [EnrollmentCourseController::class, 'getClasses']);
+    Route::post('add-class/{yearSectionId}', [EnrollmentCourseController::class, 'addClass']);
+
+    Route::get('get-year-section-id', [EnrollmentCourseController::class, 'getYearSectionId']);
 });

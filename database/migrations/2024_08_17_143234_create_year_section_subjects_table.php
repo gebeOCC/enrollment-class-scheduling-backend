@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unsignedBigInteger('subject_id');
             $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
             $table->string('class_code');
-            $table->enum('day', ['monday', 'tuesday', 'wednesday', 'thusday', 'friday', 'saturday']);
+            $table->enum('day', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']);
             $table->string('start_time');
             $table->string('end_time');
             $table->timestamps();

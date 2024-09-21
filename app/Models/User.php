@@ -51,7 +51,7 @@ class User extends Authenticatable
         return $this->hasMany(Student::class, 'student_id');
     }
 
-    public function UserInformation()
+    public function userInformation() 
     {
         return $this->hasMany(UserInformation::class, 'user_id');
     }

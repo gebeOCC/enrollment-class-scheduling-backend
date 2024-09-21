@@ -44,7 +44,7 @@ class CourseController extends Controller
 
     public function getCourseName($hashedCourseId) {
         return DB::table('course')
-            ->select('course_name', 'course_name_abbreviation')
+            ->select('id', 'course_name', 'course_name_abbreviation')
             ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
             ->first();
     }
