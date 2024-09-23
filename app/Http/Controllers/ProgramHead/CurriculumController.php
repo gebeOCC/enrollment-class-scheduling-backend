@@ -115,6 +115,5 @@ class CurriculumController extends Controller
             ]);
             return response(['message' => 'success']);
         }
-        // return response(['message' => 'success']);
     }
 }

@@ -55,8 +55,6 @@ class EnrollmentCourseController extends Controller
 
     public function addNewSection(Request $request)
     {
-
-
         $courseId = DB::table('course')
             ->select('id')
             ->where(DB::raw('MD5(id)'), '=', $request->course_id)
@@ -179,11 +177,27 @@ class EnrollmentCourseController extends Controller
 
         $classes = YearSectionSubjects::select('year_section_subjects.id', 'class_code', 'subject_id', 'day', 'start_time', 'end_time', 'room_id', 'faculty_id', 'subject_code', 'descriptive_title', 'first_name', 'last_name', 'room_name')
             ->join('user_information', 'year_section_subjects.faculty_id', '=', 'user_information.user_id')
-            ->join('subjects', 'subjects.id', '=', 'year_section_subjects.id')
+            ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
             ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
             ->where('year_section_id', '=', $yearSectionId)
             ->get();
 
         return response(['classes' => $classes, 'yearSectionId' => $yearSectionId]);
+    }
+
+    public function getRoomTime($yearLevelSectionId, $roomId)
+    {
+        return YearSectionSubjects::select('start_time', 'end_time')
+            ->where('year_section_id', '=', $yearLevelSectionId)
+            ->where('room_id', '=', $roomId)
+            ->get();
+    }
+
+    public function getInstructorTime($yearLevelSectionId, $instructorId)
+    {
+        return YearSectionSubjects::select('start_time', 'end_time')
+            ->where('year_section_id', '=', $yearLevelSectionId)
+            ->where('faculty_id', '=', $instructorId)
+            ->get();
     }
 }
