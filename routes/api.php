@@ -15,6 +15,7 @@ use App\Http\Controllers\All\YearLevelController;
 use App\Http\Controllers\ProgramHead\CurriculumController;
 use App\Http\Controllers\ProgramHead\EnrollmentCourseController;
 use App\Http\Controllers\Faculty\ClassController;
+use App\Http\Controllers\ProgramHead\PreEnrollmentController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -76,4 +77,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-class-students/{classId}', [ClassController::class, 'getClassStudents']);
 
     Route::get('get-year-section-id', [EnrollmentCourseController::class, 'getYearSectionId']);
+
+    Route::get('pre-enrollment-startup', [PreEnrollmentController::class, 'getYearLevelAndStudentType']);
 });
