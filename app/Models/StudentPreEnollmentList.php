@@ -11,8 +11,7 @@ class StudentPreEnollmentList extends Model
 
     protected $table = 'student_pre_enrollment_list';
     protected $fillable = [
-        'student_id_no',
-        'student_application_no',
+        'student_id',
         'school_year_id',
         'student_type_id',
         'course_id',

@@ -79,4 +79,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-year-section-id', [EnrollmentCourseController::class, 'getYearSectionId']);
 
     Route::get('pre-enrollment-startup', [PreEnrollmentController::class, 'getYearLevelAndStudentType']);
+    Route::post('add-new-student', [PreEnrollmentController::class, 'addNewStudent']);
+    Route::get('get-course-year-level-sujects/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getCourseYearLevelSujects']);
+    Route::get('get-student-info-application-id/{studentId}', [PreEnrollmentController::class, 'getStudentInfoApplicaiotnId']);
+    Route::get('get-student-info-student-id-number/{studentId}', [PreEnrollmentController::class, 'getStudentInfoStudentIdNumber']);
+    Route::post('create-student-pre-enrollment/{student_id}/{student_type_id}/{course_id}/{year_level_id}', [PreEnrollmentController::class, 'createStudentPreEnrollment']);
 });
