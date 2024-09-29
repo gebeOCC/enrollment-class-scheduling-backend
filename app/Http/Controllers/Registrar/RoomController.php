@@ -11,10 +11,15 @@ class RoomController extends Controller
 {
     public function addRoom(Request $request)
     {
+        $existingRoom = Room::where('room_name', $request->room_name)->first();
+
+        if ($existingRoom) {
+            return response(['message' => 'Room already exists']);
+        }
+
         Room::create([
             'room_name' => $request->room_name
         ]);
-
         $rooms = Room::select("rooms.id", "rooms.room_name", "department.department_name_abbreviation")
             ->leftJoin('department', 'rooms.department_id', '=', 'department.id')
             ->get();
@@ -54,7 +59,7 @@ class RoomController extends Controller
         return response(['message' => 'success', 'rooms' => $rooms, 'department' => $depatments]);
     }
 
-    public function unassignRoom($id) 
+    public function unassignRoom($id)
     {
         Room::where('id', $id)
             ->update([

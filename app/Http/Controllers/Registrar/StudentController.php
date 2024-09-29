@@ -17,16 +17,23 @@ class StudentController extends Controller
             'users.id',
             'user_id_no',
             'email_address',
-            'contact_number'
+            'contact_number',
+            'user_information.first_name',
+            'user_information.middle_name',
+            'user_information.last_name',
         )
-        ->selectRaw('CONCAT(user_information.first_name, " ", user_information.middle_name, " ", user_information.last_name) AS full_name')
-        ->join('user_information', 'user_information.user_id', '=', 'users.id')
-        ->where('users.user_role', '=', 'student')
-        ->get();
-
+            ->join('user_information', 'user_information.user_id', '=', 'users.id')
+            ->where('users.user_role', '=', 'student')
+            ->get();
     }
 
-    public function addStudent(Request $request) {
+    public function addStudent(Request $request)
+    {
+        $userIdExist = User::where('user_id_no', $request->user_id_no)->first();
+
+        if ($userIdExist) {
+            return response(["message" => "User ID already exists"]);
+        }
 
         $user = User::create([
             'user_id_no' => $request->user_id_no,

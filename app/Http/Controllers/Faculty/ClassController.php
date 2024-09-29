@@ -14,7 +14,7 @@ class ClassController extends Controller
     public function getFacultyClasses(Request $request)
     {
         $facultyId = $request->user()->id;
-        $latestSchoolYearId = SchoolYear::latest()->first()->id;
+        $latestSchoolYearId = SchoolYear::latest()->first();
 
         $classes = YearSectionSubjects::select(
             'year_section_subjects.id',

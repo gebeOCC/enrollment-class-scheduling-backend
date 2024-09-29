@@ -29,7 +29,13 @@ class SchoolYearController extends Controller
             'semester_id' => $validatedData['semester_id'],
         ]);
 
-        return response()->json(["message" => "Success"], 201);
+        $schoolYear = SchoolYear::select('school_year.id', 'school_year', 'semester_name')
+            ->join('semester', 'school_year.semester_id', '=', 'semester.id')
+            ->orderBy('school_year.created_at', 'asc')
+            ->get();
+
+
+        return response()->json(["message" => "Success", 'schoolYear' => $schoolYear], 201);
     }
 
     public function getSchoolYears()

@@ -13,11 +13,10 @@ class FacultyController extends Controller
 {
     public function getFacultyList()
     {
-        return User::select('users.id', 'user_id_no', 'email_address', 'department.department_name_abbreviation')
-            ->selectRaw('CONCAT(first_name, " ", middle_name, " ", last_name) AS full_name')
-            ->join('faculty', 'users.id', '=', 'faculty.faculty_id')
+        return User::select('users.id', 'user_id_no', 'email_address', 'department.department_name_abbreviation', 'first_name', 'middle_name', 'last_name')
+            ->leftJoin('faculty', 'users.id', '=', 'faculty.faculty_id')
             ->join('user_information', 'user_information.user_id', '=', 'users.id')
-            ->join('department', 'department.id', '=', 'faculty.department_id')
+            ->leftJoin('department', 'department.id', '=', 'faculty.department_id') // Use leftJoin instead of join
             ->whereIn('user_role', ['program_head', 'faculty', 'registrar'])
             ->get();
     }
