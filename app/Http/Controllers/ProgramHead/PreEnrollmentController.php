@@ -152,10 +152,69 @@ class PreEnrollmentController extends Controller
 
         foreach ($subjects as $subject) {
             StudentPreEnollmentListSubject::create([
-                'pre_enrollment_id' =>  $studentPreEnrollmentList->id,
+                'pre_enrollment_id' => $studentPreEnrollmentList->id,
                 'subject_id' => $subject['id'],
             ]);
         }
         return response(['message' => 'success'], 200);
+    }
+
+    public function getPreEnrollmentList()
+    {
+        $schoolYearId = SchoolYear::where('enrollment_status', '=', 'ongoing')->first()->id;
+
+        $pendingList = StudentPreEnollmentList::select(
+            'student_pre_enrollment_list.student_id',
+            'school_year_id',
+            'student_type_id',
+            'course_id',
+            'year_level_id',
+            'pre_enrollment_status',
+            'first_name',
+            'middle_name',
+            'last_name',
+            'application_no',
+            'user_id_no',
+            'year_level_name',
+            'course_name_abbreviation',
+            'student_type_name'
+        )
+            ->join('user_information', 'student_pre_enrollment_list.student_id', '=', 'user_information.user_id')
+            ->leftJoin('student', 'student_pre_enrollment_list.student_id', '=', 'student.student_id')
+            ->leftJoin('users', 'users.id', '=', 'student_pre_enrollment_list.student_id')
+            ->join('year_level', 'year_level.id', '=', 'student_pre_enrollment_list.year_level_id')
+            ->join('course', 'course.id', '=', 'student_pre_enrollment_list.course_id')
+            ->join('student_type', 'student_type.id', '=', 'student_pre_enrollment_list.student_type_id')
+            ->where('pre_enrollment_status', '=', 'pending')
+            ->where('school_year_id', '=', $schoolYearId)
+            ->get();
+
+        $enrolledList = StudentPreEnollmentList::select(
+            'student_pre_enrollment_list.student_id',
+            'school_year_id',
+            'student_type_id',
+            'course_id',
+            'year_level_id',
+            'pre_enrollment_status',
+            'first_name',
+            'middle_name',
+            'last_name',
+            'application_no',
+            'user_id_no',
+            'year_level_name',
+            'course_name_abbreviation',
+            'student_type_name'
+        )
+            ->join('user_information', 'student_pre_enrollment_list.student_id', '=', 'user_information.user_id')
+            ->leftJoin('student', 'student_pre_enrollment_list.student_id', '=', 'student.student_id')
+            ->leftJoin('users', 'users.id', '=', 'student_pre_enrollment_list.student_id')
+            ->join('year_level', 'year_level.id', '=', 'student_pre_enrollment_list.year_level_id')
+            ->join('course', 'course.id', '=', 'student_pre_enrollment_list.course_id')
+            ->join('student_type', 'student_type.id', '=', 'student_pre_enrollment_list.student_type_id')
+            ->where('pre_enrollment_status', '=', 'enrolled')
+            ->where('school_year_id', '=', $schoolYearId)
+            ->get();
+
+        return response(['message' => 'success', 'pending' => $pendingList, 'enrolled' => $enrolledList]);
     }
 }

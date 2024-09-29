@@ -65,12 +65,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('resume-enrollment/{id}', [SchoolYearController::class, 'resumeEnrollment']);
 
     Route::get('enrollment/{courseid}', [EnrollmentCourseController::class, 'getYearLevelSections']);
-    Route::post('add-new-section', [EnrollmentCourseController::class, 'addNewSection']);
+    Route::post('add-new-section/{courseid}', [EnrollmentCourseController::class, 'addNewSection']);
     Route::get('get-department-rooms', [EnrollmentCourseController::class, 'getDepartmentRooms']);
     Route::get('get-instructors', [EnrollmentCourseController::class, 'getInstructors']);
     Route::get('get-classes/{course_id}/{year_level_name}/{section}', [EnrollmentCourseController::class, 'getClasses']);
-    Route::get('get-room-time/{yearLevelSectionId}/{id}', [EnrollmentCourseController::class, 'getRoomTime']);
-    Route::get('get-instructor-time/{yearLevelSectionId}/{id}', [EnrollmentCourseController::class, 'getInstructorTime']);
+    Route::get('get-room-time/{yearLevelSectionId}/{id}/{day}', [EnrollmentCourseController::class, 'getRoomTime']);
+    Route::get('get-instructor-time/{yearLevelSectionId}/{id}/{day}', [EnrollmentCourseController::class, 'getInstructorTime']);
     Route::post('add-class/{yearSectionId}', [EnrollmentCourseController::class, 'addClass']);
 
     Route::get('get-faculty-classes', [ClassController::class, 'getFacultyClasses']);
@@ -84,4 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-student-info-application-id/{studentId}', [PreEnrollmentController::class, 'getStudentInfoApplicaiotnId']);
     Route::get('get-student-info-student-id-number/{studentId}', [PreEnrollmentController::class, 'getStudentInfoStudentIdNumber']);
     Route::post('create-student-pre-enrollment/{student_id}/{student_type_id}/{course_id}/{year_level_id}', [PreEnrollmentController::class, 'createStudentPreEnrollment']);
+
+    Route::get('get-pre-enrollment-list', [PreEnrollmentController::class, 'getPreEnrollmentList']);
+
 });

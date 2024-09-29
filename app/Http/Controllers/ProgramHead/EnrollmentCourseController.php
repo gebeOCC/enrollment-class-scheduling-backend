@@ -26,19 +26,9 @@ class EnrollmentCourseController extends Controller
         $schoolYearId = SchoolYear::where('enrollment_status', '=', 'ongoing')->first()->id;
 
         $yearLevels = YearLevel::select('year_level.id', 'year_level_name')
-            ->with(['YearSection' => function ($query) use ($schoolYearId, $courseId) {
-                $query->select(
-                    'year_section.id',
-                    'year_section.school_year_id',
-                    'year_section.course_id',
-                    'year_section.year_level_id',
-                    'year_section.section',
-                    'year_section.max_students'
-                )
-                    ->where('school_year_id', '=', $schoolYearId)
-                    ->where('course_id', '=', $courseId)
-                    ->leftJoin('enrolled_students', 'year_section.id', '=', 'enrolled_students.year_section_id')
-                    ->groupBy(
+            ->with([
+                'YearSection' => function ($query) use ($schoolYearId, $courseId) {
+                    $query->select(
                         'year_section.id',
                         'year_section.school_year_id',
                         'year_section.course_id',
@@ -46,14 +36,26 @@ class EnrollmentCourseController extends Controller
                         'year_section.section',
                         'year_section.max_students'
                     )
-                    ->selectRaw('COUNT(enrolled_students.id) as student_count');
-            }])
+                        ->where('school_year_id', '=', $schoolYearId)
+                        ->where('course_id', '=', $courseId)
+                        ->leftJoin('enrolled_students', 'year_section.id', '=', 'enrolled_students.year_section_id')
+                        ->groupBy(
+                            'year_section.id',
+                            'year_section.school_year_id',
+                            'year_section.course_id',
+                            'year_section.year_level_id',
+                            'year_section.section',
+                            'year_section.max_students'
+                        )
+                        ->selectRaw('COUNT(enrolled_students.id) as student_count');
+                }
+            ])
             ->get();
 
         return $yearLevels;
     }
 
-    public function addNewSection(Request $request)
+    public function addNewSection($hashedCourseId, Request $request)
     {
         $courseId = DB::table('course')
             ->select('id')
@@ -70,7 +72,41 @@ class EnrollmentCourseController extends Controller
             'max_students' => $request->max_students,
         ]);
 
-        return response(['message' => 'success']);
+        $courseId = DB::table('course')
+            ->select('id')
+            ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
+            ->first()->id;
+
+        $schoolYearId = SchoolYear::where('enrollment_status', '=', 'ongoing')->first()->id;
+
+        $yearLevels = YearLevel::select('year_level.id', 'year_level_name')
+            ->with([
+                'YearSection' => function ($query) use ($schoolYearId, $courseId) {
+                    $query->select(
+                        'year_section.id',
+                        'year_section.school_year_id',
+                        'year_section.course_id',
+                        'year_section.year_level_id',
+                        'year_section.section',
+                        'year_section.max_students'
+                    )
+                        ->where('school_year_id', '=', $schoolYearId)
+                        ->where('course_id', '=', $courseId)
+                        ->leftJoin('enrolled_students', 'year_section.id', '=', 'enrolled_students.year_section_id')
+                        ->groupBy(
+                            'year_section.id',
+                            'year_section.school_year_id',
+                            'year_section.course_id',
+                            'year_section.year_level_id',
+                            'year_section.section',
+                            'year_section.max_students'
+                        )
+                        ->selectRaw('COUNT(enrolled_students.id) as student_count');
+                }
+            ])
+            ->get();
+
+        return response(['message' => 'success', 'yearLevels' => $yearLevels]);
     }
 
     public function getDepartmentRooms()
@@ -185,19 +221,21 @@ class EnrollmentCourseController extends Controller
         return response(['classes' => $classes, 'yearSectionId' => $yearSectionId]);
     }
 
-    public function getRoomTime($yearLevelSectionId, $roomId)
+    public function getRoomTime($yearLevelSectionId, $roomId, $day)
     {
         return YearSectionSubjects::select('start_time', 'end_time')
             ->where('year_section_id', '=', $yearLevelSectionId)
             ->where('room_id', '=', $roomId)
+            ->where('day', '=', $day)
             ->get();
     }
 
-    public function getInstructorTime($yearLevelSectionId, $instructorId)
+    public function getInstructorTime($yearLevelSectionId, $instructorId, $day)
     {
         return YearSectionSubjects::select('start_time', 'end_time')
             ->where('year_section_id', '=', $yearLevelSectionId)
             ->where('faculty_id', '=', $instructorId)
+            ->where('day', '=', $day)
             ->get();
     }
 }

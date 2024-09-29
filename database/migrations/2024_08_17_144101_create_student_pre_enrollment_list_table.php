@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreign('course_id')->references('id')->on('course')->onDelete('cascade');
             $table->unsignedBigInteger('year_level_id');
             $table->foreign('year_level_id')->references('id')->on('year_level')->onDelete('cascade');
-            $table->enum('pre_enrollment_status', ['pending', 'enolled']);
+            $table->enum('pre_enrollment_status', ['pending', 'enrolled']);
             $table->timestamps();
         });
     }
