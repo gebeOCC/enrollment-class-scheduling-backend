@@ -23,6 +23,12 @@ class FacultyController extends Controller
 
     public function addFaculty(Request $request)
     {
+        $userIdExist = User::where('user_id_no', $request->user_id_no)->first();
+
+        if ($userIdExist) {
+            return response(["message" => "User ID already exists"]);
+        }
+        
         $user = User::create([
             'user_id_no' => $request->user_id_no,
             'password' => Hash::make($request->password),

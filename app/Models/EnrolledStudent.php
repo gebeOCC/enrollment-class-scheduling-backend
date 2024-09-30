@@ -11,7 +11,7 @@ class EnrolledStudent extends Model
 
     protected $table = 'enrolled_students';
     protected $fillable = [
-        'student_id_no',
+        'student_id',
         'year_section_id',
         'student_type_id',
         'enroll_type',

@@ -101,13 +101,21 @@ class CurriculumController extends Controller
                 'lecture_hours' => $request->lecture_hours,
                 'laboratory_hours' => $request->laboratory_hours,
             ]);
+
             CurriculumTermSubject::create([
                 'curriculum_term_id' => $request->curriculum_term_id,
                 'subject_id' => $subject->id,
                 'pre_requisite_subject_id' => $request->pre_requisite_subject_id,
             ]);
+
             return response(['message' => 'success']);
         } else {
+            $subjectIdExistInTerm = CurriculumTermSubject::where('subject_id', $request->subject_id)->first();
+
+            if ($subjectIdExistInTerm) {
+                return response(['message' => 'Subject already exist in this term']);
+            }
+
             CurriculumTermSubject::create([
                 'curriculum_term_id' => $request->curriculum_term_id,
                 'subject_id' => $request->subject_id,

@@ -16,6 +16,7 @@ use App\Http\Controllers\ProgramHead\CurriculumController;
 use App\Http\Controllers\ProgramHead\EnrollmentCourseController;
 use App\Http\Controllers\Faculty\ClassController;
 use App\Http\Controllers\ProgramHead\PreEnrollmentController;
+use App\Http\Controllers\Student\StudentClassController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -74,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('add-class/{yearSectionId}', [EnrollmentCourseController::class, 'addClass']);
 
     Route::get('get-faculty-classes', [ClassController::class, 'getFacultyClasses']);
+    Route::get('get-student-classes', [StudentClassController::class, 'getStudentClasses']);
     Route::get('get-class-students/{classId}', [ClassController::class, 'getClassStudents']);
 
     Route::get('get-year-section-id', [EnrollmentCourseController::class, 'getYearSectionId']);
@@ -86,5 +88,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('create-student-pre-enrollment/{student_id}/{student_type_id}/{course_id}/{year_level_id}', [PreEnrollmentController::class, 'createStudentPreEnrollment']);
 
     Route::get('get-pre-enrollment-list', [PreEnrollmentController::class, 'getPreEnrollmentList']);
-
+    Route::get('get-latest-students', [PreEnrollmentController::class, 'getLatestStudents']);
+    Route::post('create-user-id/{id}', [PreEnrollmentController::class, 'createUserId']);
+    Route::get('student-pre-enrollment-subjects/{id}', [PreEnrollmentController::class, 'getStudentPreEnrollmentSubjects']);
+    Route::get('get-year-level-section-sections/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getYearLevelSectionSections']);
+    Route::get('get-year-level-section-section-subjects/{id}', [PreEnrollmentController::class, 'getYearLevelSectionSectionSubjects']);
+    Route::post('submit-student-classes/{preEnrollmentId}/{studentId}/{yearSectionId}/{studentTypeId}', [PreEnrollmentController::class, 'submitStudentClasses']);
+    
 });
