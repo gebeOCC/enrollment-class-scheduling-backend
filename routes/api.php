@@ -18,6 +18,7 @@ use App\Http\Controllers\Faculty\ClassController;
 use App\Http\Controllers\ProgramHead\PreEnrollmentController;
 use App\Http\Controllers\Student\StudentClassController;
 use App\Http\Controllers\ProgramHead\DashboardController;
+use App\Http\Controllers\Registrar\EnrollmentController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -71,8 +72,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-department-rooms', [EnrollmentCourseController::class, 'getDepartmentRooms']);
     Route::get('get-instructors', [EnrollmentCourseController::class, 'getInstructors']);
     Route::get('get-classes/{course_id}/{year_level_name}/{section}', [EnrollmentCourseController::class, 'getClasses']);
-    Route::get('get-room-time/{yearLevelSectionId}/{id}/{day}', [EnrollmentCourseController::class, 'getRoomTime']);
-    Route::get('get-instructor-time/{yearLevelSectionId}/{id}/{day}', [EnrollmentCourseController::class, 'getInstructorTime']);
+    Route::get('get-room-time/{id}/{day}', [EnrollmentCourseController::class, 'getRoomTime']);
+    Route::get('get-instructor-time/{id}/{day}', [EnrollmentCourseController::class, 'getInstructorTime']);
     Route::post('add-class/{yearSectionId}', [EnrollmentCourseController::class, 'addClass']);
 
     Route::get('get-faculty-classes', [ClassController::class, 'getFacultyClasses']);
@@ -96,6 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-year-level-section-section-subjects/{id}', [PreEnrollmentController::class, 'getYearLevelSectionSectionSubjects']);
     Route::post('submit-student-classes/{preEnrollmentId}/{studentId}/{yearSectionId}/{studentTypeId}', [PreEnrollmentController::class, 'submitStudentClasses']);
 
-    
     Route::get('get-course-enrolled-students', [DashboardController::class, 'getCourseEnrolledStudents']);
+
+    Route::get('get-subject-classes/{subjectId}', [EnrollmentController::class, 'getSubjectClasses']);
 });

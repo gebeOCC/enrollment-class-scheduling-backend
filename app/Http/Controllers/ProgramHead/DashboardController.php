@@ -8,8 +8,8 @@ use App\Models\Department;
 use App\Models\EnrolledStudent;
 use App\Models\Faculty;
 use App\Models\SchoolYear;
-use Auth;
-use DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller

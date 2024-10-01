@@ -221,19 +221,17 @@ class EnrollmentCourseController extends Controller
         return response(['classes' => $classes, 'yearSectionId' => $yearSectionId]);
     }
 
-    public function getRoomTime($yearLevelSectionId, $roomId, $day)
+    public function getRoomTime($roomId, $day)
     {
         return YearSectionSubjects::select('start_time', 'end_time')
-            ->where('year_section_id', '=', $yearLevelSectionId)
             ->where('room_id', '=', $roomId)
             ->where('day', '=', $day)
             ->get();
     }
 
-    public function getInstructorTime($yearLevelSectionId, $instructorId, $day)
+    public function getInstructorTime($instructorId, $day)
     {
         return YearSectionSubjects::select('start_time', 'end_time')
-            ->where('year_section_id', '=', $yearLevelSectionId)
             ->where('faculty_id', '=', $instructorId)
             ->where('day', '=', $day)
             ->get();
