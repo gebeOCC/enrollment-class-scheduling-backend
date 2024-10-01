@@ -280,7 +280,7 @@ class PreEnrollmentController extends Controller
             ->leftJoin('enrolled_students', 'year_section.id', '=', 'enrolled_students.year_section_id')
             ->where('course_id', '=', $courseId)
             ->where('year_level_id', '=', $yearLevelId)
-            ->groupBy('year_section.id', 'section', 'course_id', 'year_level_id')
+            ->groupBy('year_section.id', 'section', 'course_id', 'year_level_id', 'max_students')
             ->get();
 
         return response(['message' => 'success', 'subjects' => $subjects]);
@@ -288,7 +288,7 @@ class PreEnrollmentController extends Controller
 
     public function getYearLevelSectionSectionSubjects($id)
     {
-        $classes =  YearSectionSubjects::select(
+        $classes = YearSectionSubjects::select(
             'class_code',
             'day',
             'end_time',
