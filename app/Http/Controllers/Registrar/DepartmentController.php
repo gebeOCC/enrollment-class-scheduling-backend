@@ -18,11 +18,13 @@ class DepartmentController extends Controller
         ]);
 
         $departments = Department::select('id', 'department_name', 'department_name_abbreviation')
-            ->with(['Course' => function ($query) {
-                $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
-            }])->get();
+            ->with([
+                'Course' => function ($query) {
+                    $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
+                }
+            ])->get();
 
-        return response(["message" => "success", "department" =>  $departments]);
+        return response(["message" => "success", "department" => $departments]);
     }
 
     public function getDepartmentsCourses()
@@ -50,9 +52,11 @@ class DepartmentController extends Controller
             ->leftJoin('user_information', 'users.id', '=', 'user_information.user_id')
             ->groupBy('department.id', 'department_name', 'department_name_abbreviation')
             ->orderBy('department.id')
-            ->with(['Course' => function ($query) {
-                $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
-            }])
+            ->with([
+                'Course' => function ($query) {
+                    $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
+                }
+            ])
             ->get();
 
 
@@ -68,11 +72,13 @@ class DepartmentController extends Controller
         ]);
 
         $departments = Department::select('id', 'department_name', 'department_name_abbreviation')
-            ->with(['Course' => function ($query) {
-                $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
-            }])->get();
+            ->with([
+                'Course' => function ($query) {
+                    $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
+                }
+            ])->get();
 
-        return response(["message" => "success", "department" =>  $departments]);
+        return response(["message" => "success", "department" => $departments]);
     }
 
     public function getDepartments()
@@ -83,12 +89,13 @@ class DepartmentController extends Controller
     public function getDepartmentFaculties($id)
     {
         return User::select('users.id', 'user_id_no', 'users.user_role')
-            ->selectRaw('CONCAT(first_name, " ", middle_name, " ", last_name) AS full_name')
+            ->selectRaw('CONCAT(first_name, " ", IFNULL(middle_name, ""), " ", last_name) AS full_name')
             ->join('user_information', 'user_information.user_id', '=', 'users.id')
             ->join('faculty', 'faculty.faculty_id', '=', 'users.id')
             ->where('faculty.department_id', '=', $id)
             ->whereIn('user_role', ['program_head', 'faculty', 'registrar'])
             ->get();
+
     }
 
     public function assignProgramHead(Request $request)
@@ -139,9 +146,11 @@ class DepartmentController extends Controller
             ->leftJoin('user_information', 'users.id', '=', 'user_information.user_id')
             ->groupBy('department.id', 'department_name', 'department_name_abbreviation')
             ->orderBy('department.id')
-            ->with(['Course' => function ($query) {
-                $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
-            }])
+            ->with([
+                'Course' => function ($query) {
+                    $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
+                }
+            ])
             ->get();
 
         return response(['message' => "success", "departments" => $departments]);
@@ -197,9 +206,11 @@ class DepartmentController extends Controller
             ->leftJoin('user_information', 'users.id', '=', 'user_information.user_id')
             ->groupBy('department.id', 'department_name', 'department_name_abbreviation')
             ->orderBy('department.id')
-            ->with(['Course' => function ($query) {
-                $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
-            }])
+            ->with([
+                'Course' => function ($query) {
+                    $query->select('id', 'department_id', 'course_name', 'course_name_abbreviation');
+                }
+            ])
             ->get();
 
         return response(['message' => "success", "departments" => $departments]);

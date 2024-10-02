@@ -34,7 +34,7 @@ class CourseController extends Controller
             return response()->json(['message' => 'Course not found'], 404);
         }
 
-        return Curriculum::select('curriculum.id', 'course_id', 'school_year_id','school_year','school_year.semester_id', 'semester.semester_name')
+        return Curriculum::select('curriculum.id', 'course_id', 'school_year_id', 'school_year', 'school_year.semester_id', 'semester.semester_name')
             ->join('course', 'course.id', '=', 'curriculum.course_id')
             ->join('school_year', 'school_year.id', '=', 'curriculum.school_year_id')
             ->join('semester', 'semester.id', '=', 'school_year.semester_id')
@@ -42,24 +42,37 @@ class CourseController extends Controller
             ->get();
     }
 
-    public function getCourseName($hashedCourseId) {
+    public function getCourseName($hashedCourseId)
+    {
         return DB::table('course')
             ->select('id', 'course_name', 'course_name_abbreviation')
             ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
             ->first();
     }
 
-    public function addCourseCurriculum($hashedCourseId, Request $request){
+    public function addCourseCurriculum($hashedCourseId, Request $request)
+    {
 
         $courseId = DB::table('course')
             ->select('id')
             ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
             ->first()->id;
-        
-        $curriculum = Curriculum::create([
-            'course_id' => $courseId,
-            'school_year_id' => $request->school_year_id,
-        ]);
+
+
+        $existingCurriculum = Curriculum::where('course_id', $courseId)
+            ->where('school_year_id', $request->school_year_id)
+            ->first();
+
+        if (!$existingCurriculum) {
+            Curriculum::create([
+                'course_id' => $courseId,
+                'school_year_id' => $request->school_year_id,
+            ]);
+        } else {
+            // Optionally handle the case where the curriculum already exists
+            return response()->json(['message' => 'Curriculum already exists']);
+        }
+
 
         return response(['message' => 'success']);
     }
