@@ -7,6 +7,7 @@ use App\Models\Faculty;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +53,11 @@ class AuthController extends Controller
         $userRole = $request->user()->user_role;
         $userId = $request->user()->id;
 
-        $enrollmentOngoing = SchoolYear::where('enrollment_status', '=', 'ongoing')->exists();
+        $today = Carbon::now();
+
+        $enrollmentOngoing = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->exists();
 
         $courses = [];
 

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreign('faculty_id')->references('id')->on('users')->onDelete('cascade')->unique();
             $table->unsignedBigInteger('department_id');
             $table->foreign('department_id')->references('id')->on('department')->onDelete('cascade');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
 

@@ -6,43 +6,56 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SchoolYear;
 use App\Models\Semester;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SchoolYearController extends Controller
 {
     public function addSchoolYear(Request $request)
     {
-        $validatedData = $request->validate([
-            'school_year' => 'required|string|max:255',
-            'semester_id' => 'required|integer|exists:semester,id',
-        ]);
+        // Check if there's a conflicting enrollment period
+        $conflict = SchoolYear::where(function ($query) use ($request) {
+            $query->where('start_date', '<=', $request->end_date)
+                ->where('end_date', '>=', $request->start_date);
+        })
+            ->exists();
 
-        $existingRecord = SchoolYear::where('school_year', $validatedData['school_year'])
-            ->where('semester_id', $validatedData['semester_id'])
-            ->first();
-
-        if ($existingRecord) {
-            return response()->json(["message" => "School year and semester already exist"]);
+        if ($conflict) {
+            return response()->json(["message" => "There's a conflict with an existing enrollment period."]);
         }
 
+        // Create the new school year if no conflict is found
         SchoolYear::create([
-            'school_year' => $validatedData['school_year'],
-            'semester_id' => $validatedData['semester_id'],
+            'semester_id' => $request->semester_id,
+            'start_year' => $request->start_year,
+            'end_year' => $request->end_year,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
         ]);
 
-        $schoolYear = SchoolYear::select('school_year.id', 'school_year', 'semester_name')
-            ->join('semester', 'school_year.semester_id', '=', 'semester.id')
-            ->orderBy('school_year.created_at', 'asc')
-            ->get();
-
-
-        return response()->json(["message" => "Success", 'schoolYear' => $schoolYear], 201);
+        return response()->json(["message" => "Success"]);
     }
 
     public function getSchoolYears()
     {
-        $schoolYear = SchoolYear::select('school_year.id', 'school_year', 'semester_name')
-            ->join('semester', 'school_year.semester_id', '=', 'semester.id')
-            ->orderBy('school_year.created_at', 'asc')
+        $today = Carbon::now();
+
+        $schoolYear = SchoolYear::select(
+            'semester_id',
+            'start_year',
+            'end_year',
+            'start_date',
+            'end_date',
+            'is_current',
+            'semester_name',
+            DB::raw("CASE 
+                    WHEN '$today' BETWEEN start_date AND end_date 
+                    THEN true 
+                    ELSE false 
+                 END as enrollment_ongoing")
+        )
+            ->join('semesters', 'school_years.semester_id', '=', 'semesters.id')
+            ->orderBy('school_years.id', 'desc')
             ->get();
 
         $semesters = Semester::select('id', 'semester_name')->get();
@@ -52,10 +65,31 @@ class SchoolYearController extends Controller
 
     public function getSchoolYearDetails($schoolYear, $semester)
     {
-        $schoolYearDetails = SchoolYear::select('school_year.id', 'school_year.enrollment_status', 'semester.id as semester_id')
-            ->join('semester', 'semester.id', '=', 'school_year.semester_id')
-            ->where('school_year.school_year', '=', $schoolYear)
-            ->where('semester.semester_name', '=', $semester)
+
+        $today = Carbon::now();
+
+        list($startYear, $endYear) = explode('-', $schoolYear);
+
+        $schoolYearDetails = SchoolYear::select(
+            'school_years.id',
+            'semester_id',
+            'start_year',
+            'end_year',
+            'start_date',
+            'end_date',
+            'is_current',
+            'semester_name',
+            DB::raw("CASE 
+                    WHEN '$today' BETWEEN start_date AND end_date 
+                    THEN true 
+                    ELSE false 
+                 END as enrollment_ongoing")
+        )
+            ->join('semesters', 'semesters.id', '=', 'school_years.semester_id')
+            // Check if the school year falls between start_year and end_year
+            ->where('school_years.start_year', '=', $startYear)
+            ->where('school_years.end_year', '=', $endYear)
+            ->where('semesters.semester_name', '=', $semester)
             ->first();
 
         return response([
@@ -64,38 +98,16 @@ class SchoolYearController extends Controller
         ]);
     }
 
-    public function stopEnrollment($id)
+    public function setSyDefault($schoolYearid)
     {
-        SchoolYear::where('id', '=', $id)
-            ->update(['enrollment_status' => 'ended']);
-        return response(['message' => 'success']);
-    }
+        SchoolYear::where('is_current', '=', 1)->update([
+            'is_current' => 0,
+        ]);
 
-    public function startEnrollment($id)
-    {
-        $ongoingenrollmentExist =  SchoolYear::where('enrollment_status', '=', "ongoing")->first();
+        SchoolYear::where('id', '=', $schoolYearid)->update([
+            'is_current' => 1,
+        ]);
 
-        if ($ongoingenrollmentExist) {
-            return response()->json(["message" => "There's current enrollent"]);
-        } else {
-            SchoolYear::where('id', '=', $id)
-                ->update(['enrollment_status' => 'ongoing']);
-        }
-
-        return response()->json(["message" => "success"]);
-    }
-
-    public function resumeEnrollment($id)
-    {
-        $ongoingenrollmentExist =  SchoolYear::where('enrollment_status', '=', "ongoing")->first();
-
-        if ($ongoingenrollmentExist) {
-            return response()->json(["message" => "There's current enrollent"]);
-        } else {
-            SchoolYear::where('id', '=', $id)
-                ->update(['enrollment_status' => 'ongoing']);
-        }
-
-        return response()->json(["message" => "success"]);
+        return response(["message" => "success"]);
     }
 }

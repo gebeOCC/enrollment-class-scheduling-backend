@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('year_section', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('school_year_id');
-            $table->foreign('school_year_id')->references('id')->on('school_year')->onDelete('cascade');
+            $table->foreign('school_year_id')->references('id')->on('school_years')->onDelete('cascade');
             $table->unsignedBigInteger('course_id');
             $table->foreign('course_id')->references('id')->on('course')->onDelete('cascade');
             $table->unsignedBigInteger('year_level_id');

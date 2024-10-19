@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('user_id_no')->unique()->nullable();
             $table->string('password');
-            $table->enum('user_role', ['faculty', 'student', 'program_head', 'registrar']);
+            $table->enum('user_role', ['faculty', 'student', 'program_head', 'evaluator', 'registrar']);
             $table->rememberToken();
             $table->timestamps();
         });

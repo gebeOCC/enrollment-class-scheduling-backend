@@ -13,6 +13,7 @@ class Faculty extends Model
     protected $fillable = [
         'faculty_id',
         'department_id',
+        'active',
     ];
 
     public function User()

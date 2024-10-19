@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('year_level_id');
             $table->foreign('year_level_id')->references('id')->on('year_level')->onDelete('cascade');
             $table->unsignedBigInteger('semester_id');
-            $table->foreign('semester_id')->references('id')->on('semester')->onDelete('cascade');
+            $table->foreign('semester_id')->references('id')->on('semesters')->onDelete('cascade');
             $table->timestamps();
         });
     }

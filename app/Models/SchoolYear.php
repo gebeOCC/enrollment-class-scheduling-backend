@@ -9,10 +9,13 @@ class SchoolYear extends Model
 {
     use HasFactory;
 
-    protected $table = 'school_year';
+    protected $table = 'school_years';
     protected $fillable = [
         'semester_id',
-        'school_year',
-        'enrollment_status',
+        'start_year',
+        'end_year',
+        'start_date',
+        'end_date',
+        'is_current',
     ];
 }

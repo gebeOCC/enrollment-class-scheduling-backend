@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('school_year', function (Blueprint $table) {
+        Schema::create('school_years', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('semester_id');
-            $table->foreign('semester_id')->references('id')->on('semester')->onDelete('cascade');
-            $table->string('school_year');
-            $table->enum('enrollment_status', ['ongoing', 'ended'])->nullable();
+            $table->unsignedBigInteger('semester_id')->index();  // Adding an index for performance
+            $table->foreign('semester_id')->references('id')->on('semesters')->onDelete('cascade');
+            $table->integer('start_year');
+            $table->integer('end_year');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->boolean('is_current')->default(false);
             $table->timestamps();
         });
     }

@@ -13,9 +13,13 @@ class StudentClassController extends Controller
     public function getStudentClasses(Request $request)
     {
         $studentId = $request->user()->id;
-        $latestSchoolYear = SchoolYear::latest()->first();
 
-        return EnrolledStudent::select(
+        $latestSchoolYearId = SchoolYear::latest()->first()->id;
+
+        $latestSchoolYear = SchoolYear::select('school_year', 'semester_name')
+        ->join('semester', 'semester.id', '=', 'school_year.semester_id')->first();
+
+        $studentClasses = EnrolledStudent::select(
             'enrolled_students.id',
             'enrolled_students_id',
             'year_section_subjects_id',
@@ -44,7 +48,9 @@ class StudentClassController extends Controller
             ->join('users', 'users.id', 'year_section_subjects.faculty_id')
             ->join('user_information', 'users.id', 'user_information.user_id')
             ->where('student_id', '=', $studentId)
-            ->where('year_section.school_year_id', '=', $latestSchoolYear->id)
+            ->where('year_section.school_year_id', '=', $latestSchoolYearId)
             ->get();
+
+        return response(['studentClasses' => $studentClasses, 'schoolYear' => $latestSchoolYear]);
     }
 }
