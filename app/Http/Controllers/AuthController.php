@@ -54,14 +54,17 @@ class AuthController extends Controller
         $userId = $request->user()->id;
 
         $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
 
         $enrollmentOngoing = SchoolYear::where('start_date', '<=', $today)
             ->where('end_date', '>=', $today)
             ->exists();
 
+        $enrollmentPreparation = SchoolYear::whereDate('start_date', '<=', $twoWeeksLater)->exists();
+
         $courses = [];
 
-        if ($userRole == 'program_head' && $enrollmentOngoing) {
+        if ($userRole == 'program_head' && ($enrollmentOngoing || $enrollmentPreparation)) {
             $courses = DB::table('course')
                 ->select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
                 ->join(
@@ -80,6 +83,7 @@ class AuthController extends Controller
             'message' => 'success',
             'user_role' => $userRole,
             'enrollmentOngoing' => $enrollmentOngoing,
+            'preparation' => $enrollmentPreparation,
             'courses' => $courses,
         ]);
     }

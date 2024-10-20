@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\YearLevel;
 use App\Models\YearSection;
 use App\Models\YearSectionSubjects;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,24 @@ class EnrollmentCourseController extends Controller
             ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
             ->first()->id;
 
-        $schoolYearId = SchoolYear::where('enrollment_status', '=', 'ongoing')->first()->id;
+        $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
+
+        // Attempt to find the current school year
+        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($currentSchoolYearenrollment) {
+            $schoolYearId = $currentSchoolYearenrollment->id;
+        } else {
+            // If no current school year is found, check for one starting within the next two weeks
+            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
+                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
+                ->first();
+
+            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
+        }
 
         $yearLevels = YearLevel::select('year_level.id', 'year_level_name')
             ->with([
@@ -62,7 +80,24 @@ class EnrollmentCourseController extends Controller
             ->where(DB::raw('MD5(id)'), '=', $request->course_id)
             ->first()->id;
 
-        $schoolYearId = SchoolYear::where('enrollment_status', '=', 'ongoing')->first()->id;
+        $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
+
+        // Attempt to find the current school year
+        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($currentSchoolYearenrollment) {
+            $schoolYearId = $currentSchoolYearenrollment->id;
+        } else {
+            // If no current school year is found, check for one starting within the next two weeks
+            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
+                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
+                ->first();
+
+            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
+        }
 
         YearSection::create([
             'school_year_id' => $schoolYearId,
@@ -76,8 +111,6 @@ class EnrollmentCourseController extends Controller
             ->select('id')
             ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
             ->first()->id;
-
-        $schoolYearId = SchoolYear::where('enrollment_status', '=', 'ongoing')->first()->id;
 
         $yearLevels = YearLevel::select('year_level.id', 'year_level_name')
             ->with([
@@ -193,19 +226,35 @@ class EnrollmentCourseController extends Controller
             ->where('year_level_name', '=', $yearLevelName)
             ->first();
 
-        $schoolYear = SchoolYear::where('enrollment_status', '=', 'ongoing')->first();
+        $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
 
-        if (!$course || !$yearLevel || !$schoolYear) {
+        // Attempt to find the current school year
+        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($currentSchoolYearenrollment) {
+            $schoolYearId = $currentSchoolYearenrollment->id;
+        } else {
+            // If no current school year is found, check for one starting within the next two weeks
+            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
+                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
+                ->first();
+
+            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
+        }
+
+        if (!$course || !$yearLevel || !$schoolYearId) {
             return response()->json(['error' => 'Invalid course, year level, or school year'], 404);
         }
 
         $yearSectionId = YearSection::select('id')
             ->where('course_id', '=', $course->id)
             ->where('year_level_id', '=', $yearLevel->id)
-            ->where('school_year_id', '=', $schoolYear->id)
+            ->where('school_year_id', '=', $schoolYearId)
             ->where('section', '=', $section)
-            ->first()
-            ->id;
+            ->first();
 
         if (!$yearSectionId) {
             return response()->json(['error' => 'Year section not found'], 404);

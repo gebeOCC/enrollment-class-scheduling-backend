@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\EnrolledStudent;
 use App\Models\Faculty;
 use App\Models\SchoolYear;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -23,7 +24,25 @@ class DashboardController extends Controller
             ->join('department', 'department.id', '=', 'faculty.department_id')
             ->first();
 
-        $schoolYearId = SchoolYear::where('enrollment_status', '=', 'ongoing')->first()->id;
+        $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
+
+        // Attempt to find the current school year
+        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($currentSchoolYearenrollment) {
+            $schoolYearId = $currentSchoolYearenrollment->id;
+        } else {
+            // If no current school year is found, check for one starting within the next two weeks
+            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
+                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
+                ->first();
+
+            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
+        }
+
 
         $totalStudents = Course::where('department_id', '=', $department->department_id)
             ->leftJoin('year_section', 'course.id', '=', 'year_section.course_id')

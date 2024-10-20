@@ -58,8 +58,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // FACULTY
     Route::get('get-faculty-list', [FacultyController::class, 'getFacultyList']);
-    Route::get('ph-get-faculty-list', [PhFacultyController::class, 'getFacultyList']);
     Route::post('add-faculty', [FacultyController::class, 'addFaculty']);
+    Route::get('ph-get-faculty-list', [PhFacultyController::class, 'getFacultyList']);
+    Route::post('set-faculty-inactive/{id}', [PhFacultyController::class, 'setInactive']);
+    Route::post('set-faculty-active/{id}', [PhFacultyController::class, 'setActive']);
+    Route::post('set-faculty-evaluator/{id}', [PhFacultyController::class, 'setFacultyEvaluator']);
+    Route::post('set-faculty-faculty/{id}', [PhFacultyController::class, 'setFacultyFaculty']);
 
     Route::get('get-student-list', [StudentController::class, 'getStudentList']);
     Route::post('add-student', [StudentController::class, 'addStudent']);

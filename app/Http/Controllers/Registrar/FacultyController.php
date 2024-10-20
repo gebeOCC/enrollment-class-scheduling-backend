@@ -65,4 +65,6 @@ class FacultyController extends Controller
 
         return response(["message" => "success"]);
     }
+
+    
 }

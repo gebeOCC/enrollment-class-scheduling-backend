@@ -34,10 +34,10 @@ class CourseController extends Controller
             return response()->json(['message' => 'Course not found'], 404);
         }
 
-        return Curriculum::select('curriculum.id', 'course_id', 'school_year_id', 'school_year', 'school_year.semester_id', 'semester.semester_name')
+        return Curriculum::select('curriculum.id', 'course_id', 'school_year_id', 'start_year', 'end_year', 'school_years.semester_id', 'semesters.semester_name')
             ->join('course', 'course.id', '=', 'curriculum.course_id')
-            ->join('school_year', 'school_year.id', '=', 'curriculum.school_year_id')
-            ->join('semester', 'semester.id', '=', 'school_year.semester_id')
+            ->join('school_years', 'school_years.id', '=', 'curriculum.school_year_id')
+            ->join('semesters', 'semesters.id', '=', 'school_years.semester_id')
             ->where('course_id', '=', $course->id)
             ->get();
     }
