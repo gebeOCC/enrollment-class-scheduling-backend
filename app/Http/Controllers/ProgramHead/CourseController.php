@@ -24,7 +24,6 @@ class CourseController extends Controller
 
     public function getCourseCurriculums($hashedCourseId)
     {
-        // Find the course based on the hashed ID
         $course = DB::table('course')
             ->select('id')
             ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
@@ -34,10 +33,8 @@ class CourseController extends Controller
             return response()->json(['message' => 'Course not found'], 404);
         }
 
-        return Curriculum::select('curriculum.id', 'course_id', 'school_year_id', 'start_year', 'end_year', 'school_years.semester_id', 'semesters.semester_name')
+        return Curriculum::select('curriculum.id', 'course_id', 'school_year_start', 'school_year_end')
             ->join('course', 'course.id', '=', 'curriculum.course_id')
-            ->join('school_years', 'school_years.id', '=', 'curriculum.school_year_id')
-            ->join('semesters', 'semesters.id', '=', 'school_years.semester_id')
             ->where('course_id', '=', $course->id)
             ->get();
     }
@@ -60,19 +57,19 @@ class CourseController extends Controller
 
 
         $existingCurriculum = Curriculum::where('course_id', $courseId)
-            ->where('school_year_id', $request->school_year_id)
+            ->where('school_year_start', $request->school_year_start)
+            ->where('school_year_end', $request->school_year_end)
             ->first();
 
         if (!$existingCurriculum) {
             Curriculum::create([
                 'course_id' => $courseId,
-                'school_year_id' => $request->school_year_id,
+                'school_year_start' => $request->school_year_start,
+                'school_year_end' => $request->school_year_end,
             ]);
         } else {
-            // Optionally handle the case where the curriculum already exists
             return response()->json(['message' => 'Curriculum already exists']);
         }
-
 
         return response(['message' => 'success']);
     }

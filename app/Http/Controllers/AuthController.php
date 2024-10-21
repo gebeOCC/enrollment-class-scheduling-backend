@@ -62,9 +62,21 @@ class AuthController extends Controller
 
         $enrollmentPreparation = SchoolYear::whereDate('start_date', '<=', $twoWeeksLater)->exists();
 
+        $schoolYear = [];
+
+        if ($enrollmentOngoing) {
+            $schoolYear = SchoolYear::select('start_date', 'end_date')
+                ->where('start_date', '<=', $today)
+                ->where('end_date', '>=', $today)
+                ->first();
+        } elseif ($enrollmentPreparation) {
+            $schoolYear = SchoolYear::select('start_date', 'end_date')
+                ->whereDate('start_date', '<=', $twoWeeksLater)->first();
+        }
+
         $courses = [];
 
-        if ($userRole == 'program_head' && ($enrollmentOngoing || $enrollmentPreparation)) {
+        if (($userRole == 'program_head' || $userRole == 'evaluator') && ($enrollmentOngoing || $enrollmentPreparation)) {
             $courses = DB::table('course')
                 ->select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
                 ->join(
@@ -79,12 +91,13 @@ class AuthController extends Controller
                 ->get();
         }
 
-        return response()->json([
+        return response([
             'message' => 'success',
             'user_role' => $userRole,
             'enrollmentOngoing' => $enrollmentOngoing,
             'preparation' => $enrollmentPreparation,
             'courses' => $courses,
+            'schoolYear' => $schoolYear,
         ]);
     }
 }

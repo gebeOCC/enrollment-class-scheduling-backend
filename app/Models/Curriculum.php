@@ -12,6 +12,7 @@ class Curriculum extends Model
     protected $table = 'curriculum';
     protected $fillable = [
         'course_id',
-        'school_year_id',
+        'school_year_start',
+        'school_year_end',
     ];
 }

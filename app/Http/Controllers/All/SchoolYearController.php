@@ -39,6 +39,7 @@ class SchoolYearController extends Controller
     public function getSchoolYears()
     {
         $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
 
         $schoolYear = SchoolYear::select(
             'semester_id',
@@ -52,7 +53,12 @@ class SchoolYearController extends Controller
                     WHEN '$today' BETWEEN start_date AND end_date 
                     THEN true 
                     ELSE false 
-                 END as enrollment_ongoing")
+                 END as enrollment_ongoing"),
+            DB::raw("CASE 
+                    WHEN '$twoWeeksLater' >= start_date
+                    THEN true 
+                    ELSE false 
+                 END as preparation"),
         )
             ->join('semesters', 'school_years.semester_id', '=', 'semesters.id')
             ->orderBy('school_years.id', 'desc')
@@ -70,6 +76,8 @@ class SchoolYearController extends Controller
 
         list($startYear, $endYear) = explode('-', $schoolYear);
 
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
+        
         $schoolYearDetails = SchoolYear::select(
             'school_years.id',
             'semester_id',
@@ -83,7 +91,12 @@ class SchoolYearController extends Controller
                     WHEN '$today' BETWEEN start_date AND end_date 
                     THEN true 
                     ELSE false 
-                 END as enrollment_ongoing")
+                 END as enrollment_ongoing"),
+            DB::raw("CASE 
+                    WHEN '$twoWeeksLater' >= start_date
+                    THEN true 
+                    ELSE false 
+                 END as preparation"),
         )
             ->join('semesters', 'semesters.id', '=', 'school_years.semester_id')
             // Check if the school year falls between start_year and end_year

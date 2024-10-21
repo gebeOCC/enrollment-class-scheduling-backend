@@ -31,28 +31,24 @@ class CurriculumController extends Controller
 
     public function getCurriculumTermsSubjects($hashedCourseId, $schoolyear)
     {
+        $years = explode('-', $schoolyear);
+
         $courseId = DB::table('course')
             ->select('id')
             ->where(DB::raw('MD5(id)'), '=', $hashedCourseId)
             ->first()->id;
 
-        $schoolYearId = SchoolYear::select('school_year.id')
-            ->join('semester', 'semester.id', '=', 'school_year.semester_id')
-            ->where('school_year.school_year', '=', $schoolyear)
-            ->where('semester.semester_name', '=', 'First')
-            ->first()->id;
-
-
         $curriculumId = Curriculum::select('curriculum.id')
             ->where('curriculum.course_id', '=', $courseId)
-            ->where('curriculum.school_year_id', '=', $schoolYearId)
+            ->where('curriculum.school_year_start', '=', $years[0])
+            ->where('curriculum.school_year_end', '=', $years[1])
             ->first()->id;
 
         $yearLevels = YearLevel::select('year_level.id', 'year_level_name')
             ->with([
                 'CurriculumTerm' => function ($query) use ($curriculumId) {
-                    $query->select('curriculum_term.id', 'curriculum_id', 'year_level_id', 'semester_id', 'semester.semester_name')
-                        ->join('semester', 'semester.id', '=', 'curriculum_term.semester_id')
+                    $query->select('curriculum_term.id', 'curriculum_id', 'year_level_id', 'semester_id', 'semesters.semester_name')
+                        ->join('semesters', 'semesters.id', '=', 'curriculum_term.semester_id')
                         ->where('curriculum_term.curriculum_id', '=', $curriculumId)
                         ->with([
                             'CurriculumTermSubject' => function ($query) {
