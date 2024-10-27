@@ -39,7 +39,5 @@ class EnrollmentController extends Controller
             ->where('subject_id', '=', $subjectId)
             ->where('school_year_id', '=', $schoolYearId)
             ->get();
-
-        response(['message' => 'success']);
     }
 }

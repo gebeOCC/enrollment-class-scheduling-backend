@@ -19,7 +19,7 @@ class FacultyController extends Controller
             ->leftJoin('faculty', 'users.id', '=', 'faculty.faculty_id')
             ->join('user_information', 'user_information.user_id', '=', 'users.id')
             ->leftJoin('department', 'department.id', '=', 'faculty.department_id')
-            ->whereIn('user_role', ['program_head', 'faculty', 'registrar'])
+            ->whereIn('user_role', ['program_head', 'faculty', 'registrar', 'evaluator'])
             ->get();
     }
 
@@ -65,6 +65,4 @@ class FacultyController extends Controller
 
         return response(["message" => "success"]);
     }
-
-    
 }

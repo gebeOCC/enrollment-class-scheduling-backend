@@ -157,9 +157,11 @@ class EnrollmentCourseController extends Controller
 
     public function getInstructors()
     {
-        return User::select('users.id', 'user_id_no', 'first_name', 'last_name')
+        return User::select('users.id', 'user_id_no', 'first_name', 'last_name', 'active')
             ->join('user_information', 'users.id', '=', 'user_information.user_id')
-            ->whereIn('users.user_role', ['faculty', 'program_head', 'registrar'])
+            ->join('faculty', 'users.id', '=', 'faculty.faculty_id')
+            ->where('active', '=', 1)
+            ->whereIn('users.user_role', ['faculty', 'program_head', 'registrar', 'evaluator'])
             ->get();
     }
     public function getYearSectionId(Request $request)
@@ -254,16 +256,18 @@ class EnrollmentCourseController extends Controller
             ->where('year_level_id', '=', $yearLevel->id)
             ->where('school_year_id', '=', $schoolYearId)
             ->where('section', '=', $section)
-            ->first();
+            ->first()
+            ->id;
 
         if (!$yearSectionId) {
             return response()->json(['error' => 'Year section not found'], 404);
         }
 
-        $classes = YearSectionSubjects::select('year_section_subjects.id', 'class_code', 'subject_id', 'day', 'start_time', 'end_time', 'room_id', 'faculty_id', 'subject_code', 'descriptive_title', 'first_name', 'last_name', 'room_name')
+        $classes = YearSectionSubjects::select('year_section_subjects.id', 'class_code', 'year_section_subjects.subject_id', 'day', 'start_time', 'end_time', 'room_id', 'faculty_id', 'subject_code', 'descriptive_title', 'first_name', 'last_name', 'room_name', 'year_section_id', 'pre_requisite_subject_id')
             ->join('user_information', 'year_section_subjects.faculty_id', '=', 'user_information.user_id')
             ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
             ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
+            ->join('curriculum_term_subjects', 'curriculum_term_subjects.subject_id', '=', 'year_section_subjects.subject_id')
             ->where('year_section_id', '=', $yearSectionId)
             ->get();
 

@@ -62,10 +62,6 @@ class StudentController extends Controller
 
     public function importStudents(Request $request)
     {
-
-        // Convert birthday to the correct format
-        $formattedBirthday = $this->formatBirthday($request->birthday);
-
         // Check if the user ID already exists
         $userIdExist = User::where('user_id_no', $request->user_id_no)->first();
         if ($userIdExist) {
@@ -91,7 +87,7 @@ class StudentController extends Controller
             'last_name' => $request->last_name,
             'middle_name' => $request->middle_name,
             'gender' => $request->gender,
-            'birthday' => $formattedBirthday, // Use the formatted birthday
+            'birthday' => $request->birthday, // Use the formatted birthday
             'contact_number' => $request->contact_number,
             'email_address' => $request->email_address,
             'present_address' => $request->present_address,
@@ -107,21 +103,6 @@ class StudentController extends Controller
 
         return response(["message" => "success"]);
     }
-
-    private function formatBirthday($birthday)
-    {
-        $formats = ['m/d/Y', 'd/m/Y'];
-
-        foreach ($formats as $format) {
-            $date = Carbon::createFromFormat($format, $birthday);
-            if ($date) {
-                return $date->format('Y-m-d');
-            }
-        }
-
-        return null;
-    }
-
 
     function generateRandomPassword($length = 8)
     {

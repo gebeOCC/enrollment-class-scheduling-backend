@@ -18,7 +18,7 @@ use App\Http\Controllers\ProgramHead\PreEnrollmentController;
 use App\Http\Controllers\Student\StudentClassController;
 use App\Http\Controllers\ProgramHead\DashboardController;
 use App\Http\Controllers\ProgramHead\PhFacultyController;
-use App\Http\Controllers\Registrar\EnrollmentController;
+use App\Http\Controllers\Enrollment\EnrollmentController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -65,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('set-faculty-evaluator/{id}', [PhFacultyController::class, 'setFacultyEvaluator']);
     Route::post('set-faculty-faculty/{id}', [PhFacultyController::class, 'setFacultyFaculty']);
 
+    // STUDENT
     Route::get('get-student-list', [StudentController::class, 'getStudentList']);
     Route::post('add-student', [StudentController::class, 'addStudent']);
     Route::post('import-students', [StudentController::class, 'importStudents']);
@@ -96,9 +97,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-course-year-level-sujects/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getCourseYearLevelSujects']);
     Route::get('get-student-info-student-id-number/{studentId}', [PreEnrollmentController::class, 'getStudentInfoStudentIdNumber']);
 
-    // ENROLL STUDENT
+    // ENROLL STUDENTget-year-level-section-section-subjects
     Route::get('get-year-level-section-sections/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getYearLevelSectionSections']);
-    Route::get('get-year-level-section-section-subjects/{id}', [PreEnrollmentController::class, 'getYearLevelSectionSectionSubjects']);
+    Route::get('get-year-level-section-section-subjects/{courseid}/{yearLevelNumber}/{section}', [EnrollmentController::class, 'getYearLevelSectionSectionSubjects']);
     Route::post('submit-student-classes/{preEnrollmentId}/{studentId}/{yearSectionId}/{studentTypeId}', [PreEnrollmentController::class, 'submitStudentClasses']);
 
     Route::get('get-course-enrolled-students', [DashboardController::class, 'getCourseEnrolledStudents']);
