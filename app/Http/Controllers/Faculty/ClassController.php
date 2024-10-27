@@ -14,43 +14,55 @@ class ClassController extends Controller
     public function getFacultyClasses(Request $request)
     {
         $facultyId = $request->user()->id;
-        $latestSchoolYear = SchoolYear::latest()->first();
+
+        $defaultSchoolYear = SchoolYear::select('school_years.id',  'start_year', 'end_year', 'semester_id', 'semester_name')
+            ->where('is_current', '=', 1)
+            ->join('semesters', 'semesters.id', '=', 'school_years.semester_id')
+            ->first();
 
         $classes = YearSectionSubjects::select(
-            'year_section_subjects.id',
+            'year_section_id',
+            'faculty_id',
+            'room_id',
             'subject_id',
             'day',
             'start_time',
             'end_time',
-            'room_id',
+            'end_time',
             'descriptive_title',
             'room_name',
             'section',
+            'year_level_id',
             'year_level',
+            'course_id',
             'course_name_abbreviation',
-            'year_section.year_level_id',
-            'year_section.course_id',
             'school_year_id',
         )
             ->selectRaw(
-                "MD5(year_section_subjects.id) as hashed_year_section_subject_id"
+                "SHA2(year_section_subjects.id, 256) as hashed_year_section_subject_id"
             )
             ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
             ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
             ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
-            ->join('course', 'course.id', '=', 'year_section.course_id')
             ->join('year_level', 'year_level.id', '=', 'year_section.year_level_id')
+            ->join('course', 'course.id', '=', 'year_section.course_id')
             ->where('faculty_id', '=', $facultyId)
-            ->where('school_year_id', '=', $latestSchoolYear->id)
+            ->where('school_year_id', '=', $defaultSchoolYear->id)
             ->get();
 
-        return $classes;
+        return response([
+            'message' => 'success',
+            'classes' => $classes,
+            'schoolYear' => $defaultSchoolYear,
+        ]);
     }
 
     public function getClassStudents($hashedclassId)
     {
-        $classId = YearSectionSubjects::where(DB::raw('MD5(id)'), '=', $hashedclassId)
-            ->first()->id;
+        $yearSectionSubject = YearSectionSubjects::where(DB::raw('SHA2(id, 256)'), '=', $hashedclassId)
+            ->first();
+
+        $classId = $yearSectionSubject ? $yearSectionSubject->id : null;
 
         $class = YearSectionSubjects::select(
             'year_section_subjects.id',
@@ -62,10 +74,15 @@ class ClassController extends Controller
             'year_section_id',
             'room_name',
             'descriptive_title',
-            'subject_code'
+            'subject_code',
+            'section',
+            'course_id',
+            'course_name_abbreviation',
         )
             ->join('rooms', 'rooms.id', '=', 'room_id')
             ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+            ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+            ->join('course', 'course.id', '=', 'year_section.course_id')
             ->where('year_section_subjects.id', '=', $classId)
             ->first();
 
