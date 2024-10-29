@@ -14,43 +14,54 @@ class StudentClassController extends Controller
     {
         $studentId = $request->user()->id;
 
-        $latestSchoolYearId = SchoolYear::latest()->first()->id;
+        $defaultSchoolYear = SchoolYear::select('school_years.id', 'start_year', 'end_year', 'semester_id', 'semester_name')
+            ->where('is_current', '=', 1)
+            ->join('semesters', 'semesters.id', '=', 'school_years.semester_id')
+            ->first();
 
-        $latestSchoolYear = SchoolYear::select('school_year', 'semester_name')
-        ->join('semester', 'semester.id', '=', 'school_year.semester_id')->first();
+        $studentClasses = EnrolledStudent::where('student_id', '=', $studentId)
+            ->with([
+                'YearSection' => function ($query) use ($defaultSchoolYear) {
+                    $query->where('school_year_id', '=', $defaultSchoolYear->id);
+                },
+                'YearSection.Course',
+                'YearSection.YearLevel',
+                'StudentSubject.YearSectionSubjects.Subject',
+                'StudentSubject.YearSectionSubjects.UserInformation',
+                'StudentSubject.YearSectionSubjects.Room',
+                'StudentSubject.YearSectionSubjects.YearSection.Course'
+            ])
+            ->first();
 
-        $studentClasses = EnrolledStudent::select(
-            'enrolled_students.id',
-            'enrolled_students_id',
-            'year_section_subjects_id',
-            'subject_id',
-            'year_section_subjects.faculty_id',
-            'enrolled_students.year_section_id',
-            'year_section.school_year_id',
-            'room_id',
-            'first_name',
-            'middle_name',
-            'last_name',
-            'room_name',
-            'day',
-            'start_time',
-            'end_time',
-            'descriptive_title',
-            'credit_units',
-            'class_code',
-            'subject_code',
-        )
-            ->join('student_subjects', 'enrolled_students.id', 'student_subjects.enrolled_students_id')
-            ->join('year_section', 'year_section.id', 'enrolled_students.year_section_id')
-            ->join('year_section_subjects', 'year_section_subjects.id', 'student_subjects.year_section_subjects_id')
-            ->join('rooms', 'rooms.id', 'year_section_subjects.room_id')
-            ->join('subjects', 'subjects.id', 'year_section_subjects.subject_id')
-            ->join('users', 'users.id', 'year_section_subjects.faculty_id')
-            ->join('user_information', 'users.id', 'user_information.user_id')
-            ->where('student_id', '=', $studentId)
-            ->where('year_section.school_year_id', '=', $latestSchoolYearId)
+        if (!$studentClasses) {
+            return response(['message' => 'not enrorlled', 'schoolYear' => $defaultSchoolYear]);
+        }
+
+        return response(['message' => 'success', 'studentClasses' => $studentClasses, 'schoolYear' => $defaultSchoolYear]);
+    }
+
+    public function
+    getEnrollmentRecord(Request $request)
+    {
+        $studentId = $request->user()->id;
+
+        $studentClasses = EnrolledStudent::where('student_id', '=', $studentId)
+            ->with(
+                'YearSection.Course',
+                'YearSection.SchoolYear',
+            'YearSection.SchoolYear.Semester',
+                'YearSection.YearLevel',
+                'StudentSubject.YearSectionSubjects.Subject',
+                'StudentSubject.YearSectionSubjects.UserInformation',
+                'StudentSubject.YearSectionSubjects.Room',
+                'StudentSubject.YearSectionSubjects.YearSection.Course'
+            )
             ->get();
 
-        return response(['studentClasses' => $studentClasses, 'schoolYear' => $latestSchoolYear]);
+        if ($studentClasses->isEmpty()) {
+            return response(['message' => 'no data']);
+        }
+
+        return response(['message' => 'success', 'studentClasses' => $studentClasses]);
     }
 }

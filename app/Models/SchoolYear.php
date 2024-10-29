@@ -18,4 +18,10 @@ class SchoolYear extends Model
         'end_date',
         'is_current',
     ];
+
+
+    public function Semester()
+    {
+        return $this->belongsTo(Semester::class, 'semester_id');
+    }
 }

@@ -19,6 +19,7 @@ use App\Http\Controllers\Student\StudentClassController;
 use App\Http\Controllers\ProgramHead\DashboardController;
 use App\Http\Controllers\ProgramHead\PhFacultyController;
 use App\Http\Controllers\Enrollment\EnrollmentController;
+use App\Http\Controllers\UserController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -56,6 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('assign-room', [RoomController::class, 'assignRoom']);
     Route::post('unassign-room/{id}', [RoomController::class, 'unassignRoom']);
 
+
+    // USER
+    Route::post('change-password', [UserController::class, 'changePassword']);
+
     // FACULTY
     Route::get('get-faculty-list', [FacultyController::class, 'getFacultyList']);
     Route::post('add-faculty', [FacultyController::class, 'addFaculty']);
@@ -69,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-student-list', [StudentController::class, 'getStudentList']);
     Route::post('add-student', [StudentController::class, 'addStudent']);
     Route::post('import-students', [StudentController::class, 'importStudents']);
+    Route::get('get-student-details/{id}', [StudentController::class, 'getStudentDetails']);
 
     // SCHOOL YEAR & SEMESTER
     Route::get('get-semesters', [SemesterController::class, 'getSemesters']);
@@ -92,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-faculty-classes', [ClassController::class, 'getFacultyClasses']);
     Route::get('get-student-classes', [StudentClassController::class, 'getStudentClasses']);
     Route::get('get-class-students/{classId}', [ClassController::class, 'getClassStudents']);
+    Route::get('get-enrollment-record', [StudentClassController::class, 'getEnrollmentRecord']);
 
     // PRE_ENROLLMENT
     Route::get('get-course-year-level-sujects/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getCourseYearLevelSujects']);

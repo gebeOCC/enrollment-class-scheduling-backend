@@ -24,6 +24,21 @@ class YearSection extends Model
         return $this->hasMany(EnrolledStudent::class, 'year_section_id');
     }
 
+    public function Course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    public function YearLevel()
+    {
+        return $this->belongsTo(YearLevel::class, 'year_level_id');
+    }
+
+    public function SchoolYear()
+    {
+        return $this->belongsTo(SchoolYear::class, 'school_year_id');
+    }
+
     public function getStudentCountAttribute()
     {
         return $this->enrolledStudents()->count();

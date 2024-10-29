@@ -87,7 +87,7 @@ class StudentController extends Controller
             'last_name' => $request->last_name,
             'middle_name' => $request->middle_name,
             'gender' => $request->gender,
-            'birthday' => $request->birthday, // Use the formatted birthday
+            'birthday' => $request->birthday,
             'contact_number' => $request->contact_number,
             'email_address' => $request->email_address,
             'present_address' => $request->present_address,
@@ -120,5 +120,12 @@ class StudentController extends Controller
         }
 
         return str_shuffle($password);
+    }
+
+    public function getStudentDetails($id)
+    {
+        return User::where('user_id_no', '=', $id)
+            ->with('UserInformation')
+            ->first();
     }
 }

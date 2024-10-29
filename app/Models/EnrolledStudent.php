@@ -18,12 +18,17 @@ class EnrolledStudent extends Model
         'date_enrolled',
     ];
 
-    public function enrolledStudents()
+    public function StudentSubject()
     {
-        return $this->hasMany(EnrolledStudent::class, 'year_section_id');
+        return $this->hasMany(StudentSubject::class, 'enrolled_students_id');
     }
 
-    // Accessor for the student count
+    public function YearSection()
+    {
+        return $this->belongsTo(YearSection::class, 'year_section_id');
+    }
+
+
     public function getStudentCountAttribute()
     {
         return $this->enrolledStudents()->count();

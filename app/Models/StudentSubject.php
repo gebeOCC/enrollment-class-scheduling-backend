@@ -14,4 +14,9 @@ class StudentSubject extends Model
         'enrolled_students_id',
         'year_section_subjects_id',
     ];
+
+    public function YearSectionSubjects()
+    {
+        return $this->belongsTo(YearSectionSubjects::class, 'year_section_subjects_id');
+    }
 }

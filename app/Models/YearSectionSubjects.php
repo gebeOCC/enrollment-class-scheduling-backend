@@ -20,4 +20,25 @@ class YearSectionSubjects extends Model
         'start_time',
         'end_time',
     ];
+
+    public function Subject()
+    {
+        return $this->belongsTo(Subject::class, 'subject_id');
+    }
+
+
+    public function UserInformation()
+    {
+        return $this->belongsTo(UserInformation::class, 'faculty_id');
+    }
+
+    public function Room()
+    {
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    public function YearSection()
+    {
+        return $this->belongsTo(YearSection::class, 'year_section_id');
+    }
 }
