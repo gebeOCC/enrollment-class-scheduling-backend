@@ -50,4 +50,5 @@ class PhFacultyController extends Controller
 
         return response(['message' => "success"]);
     }
+
 }

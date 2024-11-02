@@ -83,7 +83,7 @@ class DepartmentController extends Controller
 
     public function getDepartments()
     {
-        return Department::select('id', 'department_name_abbreviation')->get();
+        return Department:: get();
     }
 
     public function getDepartmentFaculties($id)
@@ -93,9 +93,8 @@ class DepartmentController extends Controller
             ->join('user_information', 'user_information.user_id', '=', 'users.id')
             ->join('faculty', 'faculty.faculty_id', '=', 'users.id')
             ->where('faculty.department_id', '=', $id)
-            ->whereIn('user_role', ['program_head', 'faculty', 'registrar'])
+            ->whereIn('user_role', ['program_head', 'faculty', 'registrar', 'evaluator'])
             ->get();
-
     }
 
     public function assignProgramHead(Request $request)

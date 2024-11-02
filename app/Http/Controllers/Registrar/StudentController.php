@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Registrar;
 
 use App\Http\Controllers\Controller;
 use App\Mail\StudentCreated;
+use App\Models\SchoolYear;
 use App\Models\User;
 use App\Models\UserInformation;
 use App\Models\Student;
@@ -30,19 +31,45 @@ class StudentController extends Controller
             ->get();
     }
 
-    public function addStudent(Request $request)
+    public function addNewStudent(Request $request)
     {
-        $userIdExist = User::where('user_id_no', $request->user_id_no)->first();
+        $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
 
-        if ($userIdExist) {
-            return response(["message" => "User ID already exists"]);
+        // Attempt to find the current school year
+        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($currentSchoolYearenrollment) {
+            $schoolYear = $currentSchoolYearenrollment;
+        } else {
+            // If no current school year is found, check for one starting within the next two weeks
+            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
+                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
+                ->first();
+
+            $schoolYear = $upcomingSchoolYear ? $upcomingSchoolYear : null;
         }
 
+        do {
+            $userIdNo = strval($schoolYear->start_year) . '-' . strval($schoolYear->semester_id) . '-' . strval($this->generateRandomFiveDigit());
+            $userIdExist = User::where('user_id_no', $userIdNo)->first();
+        } while ($userIdExist);
+
+        // Generate a random password
+        $password = $this->generateRandomPassword();
+
         $user = User::create([
-            'user_id_no' => $request->user_id_no,
-            'password' => Hash::make($request->password),
-            'user_role' => $request->user_role,
+            'user_id_no' => $userIdNo,
+            'password' => Hash::make($password),
+            'user_role' => 'student',
         ]);
+
+        $contactNumber = $request->contact_number;
+        if (strlen($contactNumber) === 10 && $contactNumber[0] !== '0') {
+            $contactNumber = '0' . $contactNumber;
+        }
 
         UserInformation::create([
             'user_id' => $user->id,
@@ -51,11 +78,16 @@ class StudentController extends Controller
             'middle_name' => $request->middle_name,
             'gender' => $request->gender,
             'birthday' => $request->birthday,
-            'contact_number' => $request->contact_number,
+            'contact_number' => $contactNumber,
             'email_address' => $request->email_address,
             'present_address' => $request->present_address,
             'zip_code' => $request->zip_code,
         ]);
+
+        // send the id number and the password to the users email
+        if ($request->email_address) {
+            Mail::to($request->email_address)->send(new StudentCreated($userIdNo, $password));
+        }
 
         return response(["message" => "success"]);
     }
@@ -81,7 +113,6 @@ class StudentController extends Controller
         // Create user information
         UserInformation::create([
             'user_id' => $user->id,
-            'password' => Hash::make($request->password),
             'user_role' => $request->user_role,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -124,8 +155,19 @@ class StudentController extends Controller
 
     public function getStudentDetails($id)
     {
-        return User::where('user_id_no', '=', $id)
+        $studentDetails = User::where('user_id_no', '=', $id)
             ->with('UserInformation')
             ->first();
+
+        if (!$studentDetails) {
+            return response(['message' => 'student not found']);
+        }
+
+        return response(['message' => 'success', 'studentDetails' => $studentDetails]);
+    }
+
+    public function generateRandomFiveDigit()
+    {
+        return str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
     }
 }

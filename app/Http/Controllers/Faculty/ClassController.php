@@ -15,10 +15,16 @@ class ClassController extends Controller
     {
         $facultyId = $request->user()->id;
 
-        $defaultSchoolYear = SchoolYear::select('school_years.id',  'start_year', 'end_year', 'semester_id', 'semester_name')
+        $currentSchoolYear = SchoolYear::select('school_years.id',  'start_year', 'end_year', 'semester_id', 'semester_name')
             ->where('is_current', '=', 1)
             ->join('semesters', 'semesters.id', '=', 'school_years.semester_id')
             ->first();
+
+        if (!$currentSchoolYear) {
+            return response([
+                'message' => 'no school year',
+            ]);
+        }
 
         $classes = YearSectionSubjects::select(
             'year_section_id',
@@ -47,13 +53,13 @@ class ClassController extends Controller
             ->join('year_level', 'year_level.id', '=', 'year_section.year_level_id')
             ->join('course', 'course.id', '=', 'year_section.course_id')
             ->where('faculty_id', '=', $facultyId)
-            ->where('school_year_id', '=', $defaultSchoolYear->id)
+            ->where('school_year_id', '=', $currentSchoolYear->id)
             ->get();
 
         return response([
             'message' => 'success',
             'classes' => $classes,
-            'schoolYear' => $defaultSchoolYear,
+            'schoolYear' => $currentSchoolYear,
         ]);
     }
 

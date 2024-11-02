@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Faculty;
 use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Database\Migrations\Migration;
@@ -18,12 +19,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('faculty_id');
             $table->foreign('faculty_id')->references('id')->on('users')->onDelete('cascade')->unique();
-            $table->unsignedBigInteger('department_id');
-            $table->foreign('department_id')->references('id')->on('department')->onDelete('cascade');
+            $table->unsignedBigInteger('department_id')->nullable();
+            $table->foreign('department_id')->references('id')->on('department');
             $table->boolean('active')->default(true);
             $table->timestamps();
         });
-
 
         $user = User::create([
             'user_id_no' => 'registrar',
@@ -42,6 +42,12 @@ return new class extends Migration
             'email_address'  => 'email@example.com',
             'present_address'  => 'zip code',
             'zip_code'  => '9999',
+        ]);
+
+        Faculty::create([
+            'faculty_id' => $user->id,
+            'department_id' => null,
+            'active' => 1,
         ]);
     }
 

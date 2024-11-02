@@ -70,10 +70,10 @@
         <p><strong>User ID:</strong> <span class="highlight">{{ $userId }}</span></p>
         <p><strong>Password:</strong> <span class="highlight">{{ $password }}</span></p>
         <p>Please change your password after logging in for the first time.</p>
-        <a href="https://yourinstitution.edu/login" class="button">Login to Your Account</a>
+        <a href="https://occ.edu.ph" class="button">Login to Your Account</a>
         <p>If you have any issues logging in, please contact support.</p>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} Your Institution. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} Opol Community College. All rights reserved.</p>
         </div>
     </div>
 </body>

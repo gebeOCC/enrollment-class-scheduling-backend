@@ -57,7 +57,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('assign-room', [RoomController::class, 'assignRoom']);
     Route::post('unassign-room/{id}', [RoomController::class, 'unassignRoom']);
 
-
     // USER
     Route::post('change-password', [UserController::class, 'changePassword']);
 
@@ -69,10 +68,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('set-faculty-active/{id}', [PhFacultyController::class, 'setActive']);
     Route::post('set-faculty-evaluator/{id}', [PhFacultyController::class, 'setFacultyEvaluator']);
     Route::post('set-faculty-faculty/{id}', [PhFacultyController::class, 'setFacultyFaculty']);
+    Route::get('get-faculty-details/{id}', [FacultyController::class, 'getFacultyDetails']);
+    Route::post('set-faculty-department', [FacultyController::class, 'setFacultyDepartment']);
 
     // STUDENT
     Route::get('get-student-list', [StudentController::class, 'getStudentList']);
-    Route::post('add-student', [StudentController::class, 'addStudent']);
+    Route::post('add-new-student', [StudentController::class, 'addNewStudent']);
     Route::post('import-students', [StudentController::class, 'importStudents']);
     Route::get('get-student-details/{id}', [StudentController::class, 'getStudentDetails']);
 

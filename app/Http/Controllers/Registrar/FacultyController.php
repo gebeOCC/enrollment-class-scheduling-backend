@@ -34,9 +34,12 @@ class FacultyController extends Controller
             $userIdExist = User::where('user_id_no', $userId)->first();
         } while ($userIdExist);
 
+        // Generate a random password
+        $password = $this->generateRandomPassword();
+
         $user = User::create([
             'user_id_no' => $userId,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($password),
             'user_role' => $request->user_role,
         ]);
 
@@ -61,8 +64,48 @@ class FacultyController extends Controller
         ]);
 
         // Send the email
-        Mail::to($request->email_address)->send(new FacultyCreated($userId, $request->password));
+        Mail::to($request->email_address)->send(new FacultyCreated($userId, $password));
 
         return response(["message" => "success"]);
+    }
+
+    function generateRandomPassword($length = 8)
+    {
+        $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        $numbers = '0123456789';
+
+        $password = $uppercase[random_int(0, strlen($uppercase) - 1)] .
+            $lowercase[random_int(0, strlen($lowercase) - 1)] .
+            $numbers[random_int(0, strlen($numbers) - 1)];
+
+        $allCharacters = $uppercase . $lowercase . $numbers;
+        for ($i = 3; $i < $length; $i++) {
+            $password .= $allCharacters[random_int(0, strlen($allCharacters) - 1)];
+        }
+
+        return str_shuffle($password);
+    }
+
+    public function getFacultyDetails($id)
+    {
+        $studentDetails = User::where('user_id_no', '=', $id)
+            ->with('UserInformation')
+            ->with('Faculty.Department')
+            ->first();
+
+        if (!$studentDetails) {
+            return response(['message' => 'student not found']);
+        }
+
+        return response(['message' => 'success', 'studentDetails' => $studentDetails]);
+    }
+
+    public function setFacultyDepartment(Request $request)
+    {
+        Faculty::where('faculty_id', '=', $request->user_id)
+            ->update(['department_id' => $request->department_id]);
+
+        return response(['message' => 'success']);
     }
 }

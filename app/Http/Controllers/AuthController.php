@@ -7,6 +7,7 @@ use App\Models\Faculty;
 use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\UserInformation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cookie;
@@ -91,6 +92,9 @@ class AuthController extends Controller
                 ->get();
         }
 
+        $firstName = UserInformation::where('user_id', '=', $userId)
+            ->first()->first_name;
+
         return response([
             'message' => 'success',
             'user_role' => $userRole,
@@ -98,6 +102,7 @@ class AuthController extends Controller
             'preparation' => $enrollmentPreparation,
             'courses' => $courses,
             'schoolYear' => $schoolYear,
+            'firstName' => $firstName,
         ]);
     }
 }
