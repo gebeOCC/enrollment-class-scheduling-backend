@@ -35,7 +35,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json(['message' => 'success', 'user_role' =>  $userRole->user_role])
-            ->cookie('token', $token, 60 * 24);
+            ->cookie('token', $token, 60 * 24 * 5);
     }
 
     public function logout(Request $request)
@@ -89,6 +89,9 @@ class AuthController extends Controller
                 ->join('faculty', 'faculty.department_id', '=', 'department.id')
                 ->join('users', 'faculty.faculty_id', '=', 'users.id')
                 ->where('users.id', '=', $userId)
+                ->get();
+        } else if ($userRole == 'registrar') {
+            $courses = Course::select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
                 ->get();
         }
 

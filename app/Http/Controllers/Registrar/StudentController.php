@@ -84,12 +84,19 @@ class StudentController extends Controller
             'zip_code' => $request->zip_code,
         ]);
 
+        $student = UserInformation::select('user_id', 'first_name', 'middle_name', 'last_name')
+            ->where('user_id', '=', $user->id)
+            ->first();
+
         // send the id number and the password to the users email
         if ($request->email_address) {
             Mail::to($request->email_address)->send(new StudentCreated($userIdNo, $password));
         }
 
-        return response(["message" => "success"]);
+        $studentDetails = User::where('id', '=', $user->id)
+            ->with('UserInformation')->first();
+
+        return response(["message" => "success", 'studentDetails' => $studentDetails, 'student' => $student, 'userIdNo' => $userIdNo]);
     }
 
     public function importStudents(Request $request)

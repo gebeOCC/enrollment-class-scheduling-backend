@@ -58,7 +58,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('unassign-room/{id}', [RoomController::class, 'unassignRoom']);
 
     // USER
+    Route::get('get-user-info', [UserController::class, 'getUserInfo']);
     Route::post('change-password', [UserController::class, 'changePassword']);
+    Route::post('change-new-password', [UserController::class, 'updatePassword']);
 
     // FACULTY
     Route::get('get-faculty-list', [FacultyController::class, 'getFacultyList']);
@@ -94,6 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-instructor-time/{id}/{day}', [EnrollmentCourseController::class, 'getInstructorTime']);
     Route::post('add-class/{yearSectionId}', [EnrollmentCourseController::class, 'addClass']);
     Route::get('get-year-section-id', [EnrollmentCourseController::class, 'getYearSectionId']);
+    Route::post('update-class', [EnrollmentCourseController::class, 'updateClass']);
 
     // CLASSES
     Route::get('get-faculty-classes', [ClassController::class, 'getFacultyClasses']);

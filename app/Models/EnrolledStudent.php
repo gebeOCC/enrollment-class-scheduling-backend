@@ -16,6 +16,7 @@ class EnrolledStudent extends Model
         'student_type_id',
         'enroll_type',
         'date_enrolled',
+        'registration_number',
     ];
 
     public function StudentSubject()

@@ -216,6 +216,22 @@ class EnrollmentCourseController extends Controller
         return response(['message' => 'success']);
     }
 
+    public function updateClass(Request $request)
+    {
+
+        YearSectionSubjects::where('id', '=', $request->id)
+            ->update([
+                'faculty_id' => $request->faculty_id,
+                'room_id' => $request->room_id,
+                'subject_id' => $request->subject_id,
+                'class_code' => $request->class_code,
+                'day' => $request->day,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+            ]);
+        return response(['message' => 'success']);
+    }
+
     public function getClasses($courseId, $yearLevelName, $section)
     {
         $course = DB::table('course')
@@ -276,7 +292,7 @@ class EnrollmentCourseController extends Controller
 
     public function getRoomTime($roomId, $day)
     {
-        return YearSectionSubjects::select('start_time', 'end_time')
+        return YearSectionSubjects::select('id', 'start_time', 'end_time')
             ->where('room_id', '=', $roomId)
             ->where('day', '=', $day)
             ->get();
@@ -284,7 +300,7 @@ class EnrollmentCourseController extends Controller
 
     public function getInstructorTime($instructorId, $day)
     {
-        return YearSectionSubjects::select('start_time', 'end_time')
+        return YearSectionSubjects::select('id', 'start_time', 'end_time')
             ->where('faculty_id', '=', $instructorId)
             ->where('day', '=', $day)
             ->get();

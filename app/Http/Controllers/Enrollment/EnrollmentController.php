@@ -9,6 +9,7 @@ use App\Models\SchoolYear;
 use App\Models\StudentSubject;
 use App\Models\StudentType;
 use App\Models\Subject;
+use App\Models\UserInformation;
 use App\Models\YearSection;
 use App\Models\YearSectionSubjects;
 use Carbon\Carbon;
@@ -80,7 +81,6 @@ class EnrollmentController extends Controller
 
     public function getClasses($subjectCode)
     {
-
         $today = Carbon::now();
         $twoWeeksLater = Carbon::now()->addWeeks(2);
 
@@ -154,14 +154,31 @@ class EnrollmentController extends Controller
             $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
         }
 
-        if (EnrolledStudent::where('student_id', '=', $studentId)->first()) {
+        if (EnrolledStudent::select('student_id', 'year_section_id', 'school_year_id')
+            ->join('year_section', 'year_section.id', '=', 'enrolled_students.year_section_id')
+            ->where('student_id', '=', $studentId)
+            ->where('school_year_id', '=', $schoolYearId)
+            ->exists()
+        ) {
             return response(['message' => 'student already enrolled']);
         }
+
+        $studentInfo = UserInformation::select('first_name', 'middle_name', 'last_name')
+            ->where('id', '=', $studentId)
+            ->first();
+
+        $firstInitial = $studentInfo->first_name[0] ?? '';
+        $middleInitial = $studentInfo->middle_name[0] ?? '';
+        $lastInitial = $studentInfo->last_name[0] ?? '';
+        $yearLastTwoDigits = substr($currentSchoolYearenrollment->start_date, 2, 2);
+
+        $regNo = $firstInitial . $middleInitial . $lastInitial . $yearLastTwoDigits . rand(100, 999);
 
         $enrolledStudent = EnrolledStudent::create([
             'student_id' => $studentId,
             'year_section_id' => $yearSectionId,
             'student_type_id' => $studentTypeId,
+            'registration_number' => $regNo,
             'enroll_type' => 'on-time',
             'date_enrolled' => now(),
         ]);

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('year_section_id')->references('id')->on('year_section')->onDelete('cascade');
             $table->unsignedBigInteger('student_type_id');
             $table->foreign('student_type_id')->references('id')->on('student_type')->onDelete('cascade');
+            $table->string('registration_number');
             $table->enum('enroll_type', ['on-time', 'late']);
             $table->date('date_enrolled');
             $table->timestamps();
