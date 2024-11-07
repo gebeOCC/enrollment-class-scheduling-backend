@@ -19,6 +19,11 @@ class EnrolledStudent extends Model
         'registration_number',
     ];
 
+    public function User()
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
     public function StudentSubject()
     {
         return $this->hasMany(StudentSubject::class, 'enrolled_students_id');
@@ -29,6 +34,10 @@ class EnrolledStudent extends Model
         return $this->belongsTo(YearSection::class, 'year_section_id');
     }
 
+    public function StudentType()
+    {
+        return $this->belongsTo(StudentType::class, 'student_type_id');
+    }
 
     public function getStudentCountAttribute()
     {

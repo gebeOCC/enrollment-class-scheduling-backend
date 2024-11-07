@@ -9,6 +9,7 @@ use App\Models\SchoolYear;
 use App\Models\StudentSubject;
 use App\Models\StudentType;
 use App\Models\Subject;
+use App\Models\User;
 use App\Models\UserInformation;
 use App\Models\YearSection;
 use App\Models\YearSectionSubjects;
@@ -193,5 +194,90 @@ class EnrollmentController extends Controller
         }
 
         return response(['message' => 'success']);
+    }
+
+    public function getYearLevelSectionSectionStudents($courseid, $yearLevelNumber, $section)
+    {
+        $course = Course::select('id')
+            ->where(DB::raw('MD5(id)'), '=', $courseid)
+            ->first();
+
+        $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
+
+        // Attempt to find the current school year
+        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($currentSchoolYearenrollment) {
+            $schoolYearId = $currentSchoolYearenrollment->id;
+        } else {
+            // If no current school year is found, check for one starting within the next two weeks
+            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
+                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
+                ->first();
+
+            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
+        }
+
+        $yearSectionId = YearSection::where('course_id', '=', $course->id)
+            ->where('year_level_id', '=', $yearLevelNumber)
+            ->where('school_year_id', '=', $schoolYearId)
+            ->where('section', '=', $section)->first()->id;
+
+        $students =  EnrolledStudent::where('year_section_id', '=', $yearSectionId)
+            ->with('User.UserInformation')
+            ->get();
+
+        return response(['message' => 'success', 'students' => $students]);
+    }
+
+    public function getStudentEnrollmentInfo($courseid, $yearLevelNumber, $section, $studentid)
+    {
+        $course = Course::select('id')
+            ->where(DB::raw('MD5(id)'), '=', $courseid)
+            ->first();
+
+        $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
+
+        // Attempt to find the current school year
+        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($currentSchoolYearenrollment) {
+            $schoolYearId = $currentSchoolYearenrollment->id;
+        } else {
+            // If no current school year is found, check for one starting within the next two weeks
+            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
+                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
+                ->first();
+
+            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
+        }
+
+        $yearSectionId = YearSection::where('course_id', '=', $course->id)
+            ->where('year_level_id', '=', $yearLevelNumber)
+            ->where('school_year_id', '=', $schoolYearId)
+            ->where('section', '=', $section)->first()->id;
+
+        $studentId = User::where('user_id_no', '=', $studentid)->first()->id;
+        $students = EnrolledStudent::where('year_section_id', '=', $yearSectionId)
+            ->with(
+                'User',
+                'StudentType',
+                'YearSection.Course',
+                'YearSection.SchoolYear.Semester',
+                'StudentSubject.YearSectionSubjects.Subject',
+                'StudentSubject.YearSectionSubjects.UserInformation',
+                'StudentSubject.YearSectionSubjects.Room',
+                'User.UserInformation'
+            )
+            ->where('student_id', '=', $studentId)
+            ->first();
+
+        return response(['message' => 'success', 'studentinfo' => $students, 'studentId' =>  $studentid]);
     }
 }
