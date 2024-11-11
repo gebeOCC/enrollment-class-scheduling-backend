@@ -137,8 +137,6 @@ class StudentController extends Controller
         //     Mail::to($request->email_address)->send(new StudentCreated($request->user_id_no, $password));
         // }
 
-        sleep(2);
-
         return response(["message" => "success"]);
     }
 

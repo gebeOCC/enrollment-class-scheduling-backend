@@ -64,7 +64,7 @@ class FacultyController extends Controller
         ]);
 
         // Send the email
-        // Mail::to($request->email_address)->send(new FacultyCreated($userId, $password));
+        Mail::to($request->email_address)->send(new FacultyCreated($userId, $password));
 
         return response(["message" => "success"]);
     }

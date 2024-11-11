@@ -26,24 +26,24 @@ return new class extends Migration
         });
 
         $user = User::create([
-            'user_id_no' => 'registrar',
-            'password' => Hash::make('registrar'),
+            'user_id_no' => 'FAC-24117',
+            'password' => Hash::make('password'),
             'user_role' => 'registrar',
         ]);
 
         UserInformation::create([
             'user_id' => $user->id,
-            'first_name'  => 'first name',
-            'last_name'  => 'last name',
-            'middle_name'  => 'middle name',
-            'gender'  => 'male',
-            'birthday'  => '2003-08-12',
+            'first_name'  => 'BERNADETH',
+            'last_name'  => 'NACUA',
+            'middle_name'  => 'T',
+            'gender'  => 'female',
+            'birthday'  => '1990-09-03',
             'contact_number'  => '09993334444',
-            'email_address'  => 'email@example.com',
-            'present_address'  => 'zip code',
-            'zip_code'  => '9999',
+            'email_address'  => 'nacua.bernadeth@occ.edu.ph',
+            'present_address'  => 'Zone ',
+            'zip_code'  => '9016',
         ]);
-
+        
         Faculty::create([
             'faculty_id' => $user->id,
             'department_id' => null,

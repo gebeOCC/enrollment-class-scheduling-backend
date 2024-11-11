@@ -175,10 +175,13 @@ class EnrollmentController extends Controller
 
         $regNo = $firstInitial . $middleInitial . $lastInitial . $yearLastTwoDigits . rand(100, 999);
 
+        $evaluatorId = $request->user()->id;
+
         $enrolledStudent = EnrolledStudent::create([
             'student_id' => $studentId,
             'year_section_id' => $yearSectionId,
             'student_type_id' => $studentTypeId,
+            'evaluator_id' => $evaluatorId,
             'registration_number' => $regNo,
             'enroll_type' => 'on-time',
             'date_enrolled' => now(),
@@ -189,7 +192,7 @@ class EnrollmentController extends Controller
         foreach ($classes as $classSubject) {
             StudentSubject::create([
                 'enrolled_students_id' => $enrolledStudent->id,
-                'year_section_subjects_id' => $classSubject['subject_id'],
+                'year_section_subjects_id' => $classSubject['id'],
             ]);
         }
 

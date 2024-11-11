@@ -14,6 +14,7 @@ class EnrolledStudent extends Model
         'student_id',
         'year_section_id',
         'student_type_id',
+        'evaluator_id',
         'enroll_type',
         'date_enrolled',
         'registration_number',
@@ -22,6 +23,11 @@ class EnrolledStudent extends Model
     public function User()
     {
         return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function Evaluator()
+    {
+        return $this->belongsTo(User::class, 'evaluator_id');
     }
 
     public function StudentSubject()
