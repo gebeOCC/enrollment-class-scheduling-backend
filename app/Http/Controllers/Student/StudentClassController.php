@@ -51,14 +51,16 @@ class StudentClassController extends Controller
 
         $studentClasses = EnrolledStudent::where('student_id', '=', $studentId)
             ->with(
-                'YearSection.Course',
-                'YearSection.SchoolYear',
-                'YearSection.SchoolYear.Semester',
-                'YearSection.YearLevel',
-                'StudentSubject.YearSectionSubjects.Subject',
-                'StudentSubject.YearSectionSubjects.UserInformation',
-                'StudentSubject.YearSectionSubjects.Room',
-                'StudentSubject.YearSectionSubjects.YearSection.Course'
+            'User',
+            'Evaluator.EvaluatorInformation',
+            'StudentType',
+            'YearSection.Course',
+            'YearSection.YearLevel',
+            'YearSection.SchoolYear.Semester',
+            'StudentSubject.YearSectionSubjects.Subject',
+            'StudentSubject.YearSectionSubjects.UserInformation',
+            'StudentSubject.YearSectionSubjects.Room',
+            'User.UserInformation'
             )
             ->get();
 
