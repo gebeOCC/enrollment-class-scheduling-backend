@@ -270,8 +270,10 @@ class EnrollmentController extends Controller
         $students = EnrolledStudent::where('year_section_id', '=', $yearSectionId)
             ->with(
                 'User',
+                'Evaluator.EvaluatorInformation',
                 'StudentType',
                 'YearSection.Course',
+                'YearSection.YearLevel',
                 'YearSection.SchoolYear.Semester',
                 'StudentSubject.YearSectionSubjects.Subject',
                 'StudentSubject.YearSectionSubjects.UserInformation',

@@ -24,12 +24,16 @@ class StudentClassController extends Controller
                 'YearSection' => function ($query) use ($defaultSchoolYear) {
                     $query->where('school_year_id', '=', $defaultSchoolYear->id);
                 },
+                'User',
+                'Evaluator.EvaluatorInformation',
+                'StudentType',
                 'YearSection.Course',
                 'YearSection.YearLevel',
+                'YearSection.SchoolYear.Semester',
                 'StudentSubject.YearSectionSubjects.Subject',
                 'StudentSubject.YearSectionSubjects.UserInformation',
                 'StudentSubject.YearSectionSubjects.Room',
-                'StudentSubject.YearSectionSubjects.YearSection.Course'
+                'User.UserInformation'
             ])
             ->first();
 
@@ -49,7 +53,7 @@ class StudentClassController extends Controller
             ->with(
                 'YearSection.Course',
                 'YearSection.SchoolYear',
-            'YearSection.SchoolYear.Semester',
+                'YearSection.SchoolYear.Semester',
                 'YearSection.YearLevel',
                 'StudentSubject.YearSectionSubjects.Subject',
                 'StudentSubject.YearSectionSubjects.UserInformation',
