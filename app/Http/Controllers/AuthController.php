@@ -32,7 +32,8 @@ class AuthController extends Controller
             ->where('user_id_no', '=', $request->user_id_no)
             ->first();
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $expiration = Carbon::now()->addWeek();
+        $token = $user->createToken('auth_token', ['*'], $expiration)->plainTextToken;
 
         return response()->json(['message' => 'success', 'user_role' =>  $userRole->user_role])
             ->cookie('token', $token, 60 * 24 * 5);
@@ -40,7 +41,7 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        $request->user()->currentAccessToken()->delete();
 
         $cookie = Cookie::forget('token');
 

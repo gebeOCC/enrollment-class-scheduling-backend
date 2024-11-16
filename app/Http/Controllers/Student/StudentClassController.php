@@ -14,15 +14,19 @@ class StudentClassController extends Controller
     {
         $studentId = $request->user()->id;
 
-        $defaultSchoolYear = SchoolYear::select('school_years.id', 'start_year', 'end_year', 'semester_id', 'semester_name')
+        $currentSchoolYear = SchoolYear::select('school_years.id', 'start_year', 'end_year', 'semester_id', 'semester_name')
             ->where('is_current', '=', 1)
             ->join('semesters', 'semesters.id', '=', 'school_years.semester_id')
             ->first();
 
+        if (!$currentSchoolYear) {
+            return response(['message' => 'no current school year']);
+        }
+
         $studentClasses = EnrolledStudent::where('student_id', '=', $studentId)
             ->with([
-                'YearSection' => function ($query) use ($defaultSchoolYear) {
-                    $query->where('school_year_id', '=', $defaultSchoolYear->id);
+                'YearSection' => function ($query) use ($currentSchoolYear) {
+                    $query->where('school_year_id', '=', $currentSchoolYear->id);
                 },
                 'User',
                 'Evaluator.EvaluatorInformation',
@@ -37,11 +41,14 @@ class StudentClassController extends Controller
             ])
             ->first();
 
-        if (!$studentClasses) {
-            return response(['message' => 'not enrorlled', 'schoolYear' => $defaultSchoolYear]);
+        if (!$studentClasses->YearSection) {
+            return response([
+                'message' => 'not enrolled',
+                'schoolYear' => $currentSchoolYear,
+            ]);
         }
 
-        return response(['message' => 'success', 'studentClasses' => $studentClasses, 'schoolYear' => $defaultSchoolYear]);
+        return response(['message' => 'success', 'studentClasses' => $studentClasses, 'schoolYear' => $currentSchoolYear]);
     }
 
     public function
@@ -51,16 +58,16 @@ class StudentClassController extends Controller
 
         $studentClasses = EnrolledStudent::where('student_id', '=', $studentId)
             ->with(
-            'User',
-            'Evaluator.EvaluatorInformation',
-            'StudentType',
-            'YearSection.Course',
-            'YearSection.YearLevel',
-            'YearSection.SchoolYear.Semester',
-            'StudentSubject.YearSectionSubjects.Subject',
-            'StudentSubject.YearSectionSubjects.UserInformation',
-            'StudentSubject.YearSectionSubjects.Room',
-            'User.UserInformation'
+                'User',
+                'Evaluator.EvaluatorInformation',
+                'StudentType',
+                'YearSection.Course',
+                'YearSection.YearLevel',
+                'YearSection.SchoolYear.Semester',
+                'StudentSubject.YearSectionSubjects.Subject',
+                'StudentSubject.YearSectionSubjects.UserInformation',
+                'StudentSubject.YearSectionSubjects.Room',
+                'User.UserInformation'
             )
             ->get();
 
