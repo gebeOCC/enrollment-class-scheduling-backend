@@ -43,7 +43,6 @@ class DashboardController extends Controller
             $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
         }
 
-
         $totalStudents = Course::where('department_id', '=', $department->department_id)
             ->leftJoin('year_section', 'course.id', '=', 'year_section.course_id')
             ->leftJoin('enrolled_students', function ($join) use ($schoolYearId) {

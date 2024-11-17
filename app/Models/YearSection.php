@@ -19,7 +19,7 @@ class YearSection extends Model
         'max_students',
     ];
 
-    public function enrolledStudents()
+    public function EnrolledStudents()
     {
         return $this->hasMany(EnrolledStudent::class, 'year_section_id');
     }
@@ -41,6 +41,6 @@ class YearSection extends Model
 
     public function getStudentCountAttribute()
     {
-        return $this->enrolledStudents()->count();
+        return $this->EnrolledStudents()->count();
     }
 }
