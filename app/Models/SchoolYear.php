@@ -24,4 +24,9 @@ class SchoolYear extends Model
     {
         return $this->belongsTo(Semester::class, 'semester_id');
     }
+
+    public function YearSection()
+    {
+        return $this->hasMany(YearSection::class, 'school_year_id');
+    }
 }
