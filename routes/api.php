@@ -113,6 +113,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-year-level-section-section-subjects/{courseid}/{yearLevelNumber}/{section}', [EnrollmentController::class, 'getYearLevelSectionSectionSubjects']);
     Route::get('get-year-level-section-section-students/{courseid}/{yearLevelNumber}/{section}', [EnrollmentController::class, 'getYearLevelSectionSectionStudents']);
     Route::get('get-student-enrollment-info/{courseid}/{yearLevelNumber}/{section}/{studentid}', [EnrollmentController::class, 'getStudentEnrollmentInfo']);
+    Route::get('get-student-enrollment-subjects/{courseid}/{yearLevelNumber}/{section}/{studentid}', [EnrollmentController::class, 'getStudentEnrollmentSubjects']);
     Route::get('get-classes/{subjectCode}', [EnrollmentController::class, 'getClasses']);
     Route::post('enroll-student/{studentId}/{studentTypeId}/{yearSectionId}', [EnrollmentController::class, 'enrollStudent']);
     Route::post('submit-student-classes/{preEnrollmentId}/{studentId}/{yearSectionId}/{studentTypeId}', [PreEnrollmentController::class, 'submitStudentClasses']);

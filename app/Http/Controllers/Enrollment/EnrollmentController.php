@@ -285,4 +285,48 @@ class EnrollmentController extends Controller
 
         return response(['message' => 'success', 'studentinfo' => $students, 'studentId' =>  $studentid]);
     }
+
+    public function getStudentEnrollmentSubjects($courseid, $yearLevelNumber, $section, $studentid)
+    {
+        $course = Course::where(DB::raw('MD5(id)'), '=', $courseid)
+            ->first();
+
+        $today = Carbon::now();
+        $twoWeeksLater = Carbon::now()->addWeeks(2);
+
+        // Attempt to find the current school year
+        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+
+        if ($currentSchoolYearenrollment) {
+            $schoolYearId = $currentSchoolYearenrollment->id;
+        } else {
+            // If no current school year is found, check for one starting within the next two weeks
+            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
+                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
+                ->first();
+
+            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
+        }
+
+        $studentInfo = User::select('users.id', 'user_id_no', 'first_name', 'middle_name', 'last_name')
+            ->where('user_id_no', '=', $studentid)
+            ->join('user_information', 'users.id', '=', 'user_information.user_id')
+            ->first();
+
+        $studentEnrolled = EnrolledStudent::select('enrolled_students.id')
+            ->join('year_section', 'enrolled_students.year_section_id', '=', 'year_section.id')
+            ->where('student_id', '=', $studentInfo->id)
+            ->where('year_section.school_year_id', '=', $schoolYearId)
+            ->first();
+
+        $classes = StudentSubject::select('year_section_subjects.id', 'class_code', 'subject_code', 'descriptive_title', 'day', 'start_time', 'end_time', 'credit_units')
+            ->join('year_section_subjects', 'year_section_subjects.id', '=', 'student_subjects.year_section_subjects_id')
+            ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id',)
+            ->where('enrolled_students_id', '=', $studentEnrolled->id)
+            ->get();
+
+        return response(['message' => 'success', 'studentInfo' => $studentInfo, 'course' =>  $course, 'classes' => $classes]);
+    }
 }
