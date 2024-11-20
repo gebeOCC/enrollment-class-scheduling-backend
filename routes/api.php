@@ -83,6 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-semesters', [SemesterController::class, 'getSemesters']);
     Route::get('get-school-years', [SchoolYearController::class, 'getSchoolYears']);
     Route::get('get-school-year-details/{schoolYear}/{semester}', [SchoolYearController::class, 'getSchoolYearDetails']);
+    Route::get('get-school-year-room-schedules/{schoolYear}/{semester}', [SchoolYearController::class, 'getSchoolYearRoomSchedules']);
+    Route::get('get-school-year-faculty-schedules/{schoolYear}/{semester}', [SchoolYearController::class, 'getSchoolYearFacultySchedules']);
     Route::post('set-sy-default/{schoolYearid}', [SchoolYearController::class, 'setSyDefault']);
     Route::post('add-school-year', [SchoolYearController::class, 'addSchoolYear']);
 
@@ -107,6 +109,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // PRE_ENROLLMENT
     Route::get('get-course-year-level-sujects/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getCourseYearLevelSujects']);
     Route::get('get-student-info-student-id-number/{studentId}', [PreEnrollmentController::class, 'getStudentInfoStudentIdNumber']);
+    Route::get('get-enrollment-room-schedules', [EnrollmentController::class, 'getEnrollmentRoomSchedules']);
+    Route::get('get-enrollment-faculty-schedules', [EnrollmentController::class, 'getEnrollmentFacultySchedules']);
 
     // ENROLL STUDENT
     Route::get('get-year-level-section-sections/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getYearLevelSectionSections']);
@@ -117,6 +121,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-classes/{subjectCode}', [EnrollmentController::class, 'getClasses']);
     Route::post('enroll-student/{studentId}/{studentTypeId}/{yearSectionId}', [EnrollmentController::class, 'enrollStudent']);
     Route::post('submit-student-classes/{preEnrollmentId}/{studentId}/{yearSectionId}/{studentTypeId}', [PreEnrollmentController::class, 'submitStudentClasses']);
+    Route::post('remove-student-subject', [EnrollmentController::class, 'removeStudentSubject']);
+    Route::post('add-student-subject', [EnrollmentController::class, 'addStudentSubject']);
+
 
     Route::get('get-enrollment-dashboard-data', [DashboardController::class, 'getEnrollmentDashboardData']);
 

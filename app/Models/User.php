@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserInformation::class, 'user_id');
     }
+
+    public function Schedules()
+    {
+        return $this->hasMany(YearSectionSubjects::class, 'faculty_id');
+    }
 }

@@ -7,10 +7,13 @@ use App\Models\Course;
 use App\Models\Department;
 use App\Models\EnrolledStudent;
 use App\Models\Faculty;
+use App\Models\Room;
 use Illuminate\Http\Request;
 use App\Models\SchoolYear;
 use App\Models\Semester;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class SchoolYearController extends Controller
@@ -75,7 +78,6 @@ class SchoolYearController extends Controller
 
     public function getSchoolYearDetails($schoolYear, $semester, Request $request)
     {
-
         $today = Carbon::now();
 
         list($startYear, $endYear) = explode('-', $schoolYear);
@@ -370,5 +372,85 @@ class SchoolYearController extends Controller
         ]);
 
         return response(["message" => "success"]);
+    }
+
+    public function getSchoolYearRoomSchedules($schoolYear, $semester)
+    {
+        list($startYear, $endYear) = explode('-', $schoolYear);
+
+        $user = Auth::user();
+
+        $departmentId = Faculty::where('faculty_id', '=', $user->id)->first()->department_id;
+
+        $schoolYearId =  SchoolYear::select('school_years.id')
+            ->where('start_year',  '=', $startYear)
+            ->where('end_year',  '=', $endYear)
+            ->where('semester_name',  '=', $semester)
+            ->join('semesters', 'semesters.id',  '=',  'school_years.semester_id')
+            ->first()->id;
+
+        return Room::select('rooms.id', 'room_name')
+        ->with(['Schedules' => function ($query) use ($schoolYearId) {
+            $query->select(
+                'day',
+                'descriptive_title',
+                'end_time',
+                'faculty_id',
+                'year_section_subjects.id',
+                'room_id',
+                'start_time',
+                'subject_id',
+                'year_section_id',
+                'first_name',
+                'middle_name',
+                'last_name',
+                'class_code',
+                'school_year_id'
+            )
+                ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+                ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
+                ->join('user_information', 'users.id', '=', 'user_information.user_id')
+                ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+                ->where('school_year_id', '=', $schoolYearId);
+        }])
+        ->whereHas('Schedules', function ($query) use ($schoolYearId) {
+            $query->where('school_year_id', '=', $schoolYearId);
+        })
+        ->leftJoin('year_section_subjects', 'rooms.id', '=', 'year_section_subjects.room_id')
+        ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+        ->join('course', 'course.id', '=', 'year_section.course_id')
+        ->where('course.department_id', '=', $departmentId)
+        ->groupBy('room_name', 'rooms.id')
+        ->get();
+
+    }
+
+    public function getSchoolYearFacultySchedules($schoolYear, $semester)
+    {
+        list($startYear, $endYear) = explode('-', $schoolYear);
+
+        $user = Auth::user();
+
+        $departmentId = Faculty::where('faculty_id', '=', $user->id)->first()->department_id;
+
+        $schoolYearId =  SchoolYear::select('school_years.id')
+            ->where('start_year',  '=', $startYear)
+            ->where('end_year',  '=', $endYear)
+            ->where('semester_name',  '=', $semester)
+            ->join('semesters', 'semesters.id',  '=',  'school_years.semester_id')
+            ->first()->id;
+
+        return User::select('users.id', 'faculty_id', 'first_name', 'middle_name', 'last_name', 'active')
+            ->with(['Schedules' => function ($query) use ($schoolYearId) {
+                $query->select('room_name', 'day', 'descriptive_title', 'end_time', 'faculty_id', 'year_section_subjects.id', 'room_id', 'start_time', 'subject_id', 'year_section_id', 'class_code', 'school_year_id')
+                    ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+                    ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
+                    ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+                    ->where('school_year_id', '=', $schoolYearId);
+            }])
+            ->join('faculty', 'users.id', '=', 'faculty.faculty_id')
+            ->join('user_information', 'users.id', '=', 'user_information.user_id')
+            ->where('department_id', '=', $departmentId)
+            ->get();
     }
 }

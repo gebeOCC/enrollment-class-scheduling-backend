@@ -14,4 +14,9 @@ class Room extends Model
         'department_id  ',
         'room_name',
     ];
+
+    public function Schedules()
+    {
+        return $this->hasMany(YearSectionSubjects::class, 'room_id');
+    }
 }

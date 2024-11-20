@@ -25,4 +25,10 @@ class Faculty extends Model
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+
+    public function Schedules()
+    {
+        return $this->hasMany(YearSectionSubjects::class, 'room_id');
+    }
+    
 }
