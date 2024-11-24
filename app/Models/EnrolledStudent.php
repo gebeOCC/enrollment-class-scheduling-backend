@@ -30,6 +30,11 @@ class EnrolledStudent extends Model
         return $this->belongsTo(User::class, 'evaluator_id');
     }
 
+    public function Student()
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
     public function StudentSubject()
     {
         return $this->hasMany(StudentSubject::class, 'enrolled_students_id');

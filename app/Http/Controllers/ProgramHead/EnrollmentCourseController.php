@@ -279,11 +279,10 @@ class EnrollmentCourseController extends Controller
             return response()->json(['error' => 'Year section not found'], 404);
         }
 
-        $classes = YearSectionSubjects::select('year_section_subjects.id', 'class_code', 'year_section_subjects.subject_id', 'day', 'start_time', 'end_time', 'room_id', 'faculty_id', 'subject_code', 'descriptive_title', 'first_name', 'last_name', 'room_name', 'year_section_id', 'pre_requisite_subject_id')
+        $classes = YearSectionSubjects::select('year_section_subjects.id', 'class_code', 'year_section_subjects.subject_id', 'day', 'start_time', 'end_time', 'room_id', 'faculty_id', 'subject_code', 'descriptive_title', 'first_name', 'last_name', 'room_name', 'year_section_id')
             ->join('user_information', 'year_section_subjects.faculty_id', '=', 'user_information.user_id')
             ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
             ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
-            ->join('curriculum_term_subjects', 'curriculum_term_subjects.subject_id', '=', 'year_section_subjects.subject_id')
             ->where('year_section_id', '=', $yearSectionId)
             ->get();
 

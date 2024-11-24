@@ -53,7 +53,7 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $userRole = $request->user()->user_role;
-        $userId = $request->user()->id;
+        $user = $request->user();
 
         $today = Carbon::now();
         $twoWeeksLater = Carbon::now()->addWeeks(2);
@@ -89,14 +89,14 @@ class AuthController extends Controller
                 )
                 ->join('faculty', 'faculty.department_id', '=', 'department.id')
                 ->join('users', 'faculty.faculty_id', '=', 'users.id')
-                ->where('users.id', '=', $userId)
+                ->where('users.id', '=', $user->id)
                 ->get();
         } else if ($userRole == 'registrar') {
             $courses = Course::select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
                 ->get();
         }
 
-        $firstName = UserInformation::where('user_id', '=', $userId)
+        $firstName = UserInformation::where('user_id', '=', $user->id)
             ->first()->first_name;
 
         return response([
@@ -107,6 +107,7 @@ class AuthController extends Controller
             'courses' => $courses,
             'schoolYear' => $schoolYear,
             'firstName' => $firstName,
+            'passwordChange' => $user->password_change,
         ]);
     }
 }

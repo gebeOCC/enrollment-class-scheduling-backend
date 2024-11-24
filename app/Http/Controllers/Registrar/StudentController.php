@@ -26,7 +26,7 @@ class StudentController extends Controller
             'user_information.middle_name',
             'user_information.last_name',
         )
-            ->join('user_information', 'user_information.user_id', '=', 'users.id')
+            ->leftJoin('user_information', 'user_information.user_id', '=', 'users.id')
             ->where('users.user_role', '=', 'student')
             ->get();
     }
@@ -117,7 +117,21 @@ class StudentController extends Controller
             'user_role' => "student",
         ]);
 
-        // Create user information
+        // Check if the birthday format is valid
+        $birthday = $request->birthday;
+
+        if ($birthday) {
+            // Check if the format is 'YYYY-MM-DD' or 'MONTH DD, YYYY'
+            $isValidFormat = \DateTime::createFromFormat('Y-m-d', $birthday) ||
+            \DateTime::createFromFormat('F j, Y', $birthday);
+
+            // Set birthday to null if the format is invalid
+            if (!$isValidFormat) {
+                $birthday = null;
+            }
+        }
+
+        // Create the UserInformation record
         UserInformation::create([
             'user_id' => $user->id,
             'user_role' => $request->user_role,
@@ -125,17 +139,20 @@ class StudentController extends Controller
             'last_name' => $request->last_name,
             'middle_name' => $request->middle_name,
             'gender' => $request->gender,
-            'birthday' => $request->birthday,
+            'birthday' => $birthday,
             'contact_number' => $request->contact_number,
             'email_address' => $request->email_address,
             'present_address' => $request->present_address,
             'zip_code' => $request->zip_code,
         ]);
 
+
         // send the id number and the password to the users email
         // if ($request->email_address) {
         //     Mail::to($request->email_address)->send(new StudentCreated($request->user_id_no, $password));
         // }
+
+        sleep(1);
 
         return response(["message" => "success"]);
     }

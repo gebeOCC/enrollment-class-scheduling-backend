@@ -23,32 +23,40 @@ class StudentClassController extends Controller
             return response(['message' => 'no current school year']);
         }
 
-        $studentClasses = EnrolledStudent::where('student_id', '=', $studentId)
+        $studentClasses = EnrolledStudent::whereHas('YearSection', function ($query) use ($currentSchoolYear) {
+            $query->where('school_year_id', '=', $currentSchoolYear->id);
+        })
+            ->whereHas('student', function ($query) use ($studentId) {
+                $query->where('id', '=', $studentId);
+            })
             ->with([
                 'YearSection' => function ($query) use ($currentSchoolYear) {
                     $query->where('school_year_id', '=', $currentSchoolYear->id);
                 },
-                'User',
                 'Evaluator.EvaluatorInformation',
                 'StudentType',
                 'YearSection.Course',
                 'YearSection.YearLevel',
                 'YearSection.SchoolYear.Semester',
                 'StudentSubject.YearSectionSubjects.Subject',
-                'StudentSubject.YearSectionSubjects.UserInformation',
+                'StudentSubject.YearSectionSubjects.Instructor.InstructorInformation',
                 'StudentSubject.YearSectionSubjects.Room',
-                'User.UserInformation'
+                'Student.StudentInformation'
             ])
             ->first();
 
-        if (!$studentClasses->YearSection) {
+        if (!$studentClasses || !$studentClasses->YearSection) {
             return response([
                 'message' => 'not enrolled',
                 'schoolYear' => $currentSchoolYear,
             ]);
         }
 
-        return response(['message' => 'success', 'studentClasses' => $studentClasses, 'schoolYear' => $currentSchoolYear]);
+        return response([
+            'message' => 'success',
+            'studentClasses' => $studentClasses,
+            'schoolYear' => $currentSchoolYear,
+        ]);
     }
 
     public function
@@ -58,16 +66,15 @@ class StudentClassController extends Controller
 
         $studentClasses = EnrolledStudent::where('student_id', '=', $studentId)
             ->with(
-                'User',
                 'Evaluator.EvaluatorInformation',
                 'StudentType',
                 'YearSection.Course',
                 'YearSection.YearLevel',
                 'YearSection.SchoolYear.Semester',
                 'StudentSubject.YearSectionSubjects.Subject',
-                'StudentSubject.YearSectionSubjects.UserInformation',
+                'StudentSubject.YearSectionSubjects.Instructor.InstructorInformation',
                 'StudentSubject.YearSectionSubjects.Room',
-                'User.UserInformation'
+                'Student.StudentInformation'
             )
             ->get();
 

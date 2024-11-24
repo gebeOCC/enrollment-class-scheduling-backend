@@ -273,16 +273,15 @@ class EnrollmentController extends Controller
         $studentId = User::where('user_id_no', '=', $studentid)->first()->id;
         $students = EnrolledStudent::where('year_section_id', '=', $yearSectionId)
             ->with(
-                'User',
                 'Evaluator.EvaluatorInformation',
                 'StudentType',
                 'YearSection.Course',
                 'YearSection.YearLevel',
                 'YearSection.SchoolYear.Semester',
                 'StudentSubject.YearSectionSubjects.Subject',
-                'StudentSubject.YearSectionSubjects.UserInformation',
+                'StudentSubject.YearSectionSubjects.Instructor.InstructorInformation',
                 'StudentSubject.YearSectionSubjects.Room',
-                'User.UserInformation'
+                'Student.StudentInformation'
             )
             ->where('student_id', '=', $studentId)
             ->first();

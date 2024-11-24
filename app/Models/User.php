@@ -21,6 +21,7 @@ class User extends Authenticatable
         'user_id_no',
         'password',
         'user_role',
+        'password_change'
     ];
 
     /**
@@ -56,7 +57,19 @@ class User extends Authenticatable
         return $this->hasOne(UserInformation::class, 'user_id');
     }
 
+    
     public function EvaluatorInformation()
+    {
+        return $this->hasOne(UserInformation::class, 'user_id');
+    }
+
+
+    public function InstructorInformation()
+    {
+        return $this->hasOne(UserInformation::class, 'user_id');
+    }
+
+    public function StudentInformation()
     {
         return $this->hasOne(UserInformation::class, 'user_id');
     }

@@ -34,7 +34,7 @@ class UserController extends Controller
         }
 
         // Update the user's password if the current password is correct
-        $user->update(['password' => Hash::make($request->password)]);
+        $user->update(['password' => Hash::make($request->password), 'password_change' => 1]);
 
         // Return a success response
         return response(['message' => 'success']);
