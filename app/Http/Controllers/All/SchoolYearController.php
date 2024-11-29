@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Models\SchoolYear;
 use App\Models\Semester;
 use App\Models\User;
+use App\Models\YearSection;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -221,7 +222,7 @@ class SchoolYearController extends Controller
                                 $sectionQuery->where('school_year_id', $schoolYearDetails->id)
                                     ->join('enrolled_students', 'year_section.id',  '=',  'enrolled_students.year_section_id');
                             },
-                        ])->with(['YearSection' => function ($query) {
+                        ])->with(['YearSection' => function ($query) use ($schoolYearDetails) {
                             $query->join('enrolled_students', 'year_section.id', '=', 'enrolled_students.year_section_id')
                                 ->join('course', 'course.id', '=', 'year_section.course_id')
                                 ->select(
@@ -230,6 +231,7 @@ class SchoolYearController extends Controller
                                     'course_name_abbreviation',
                                     DB::raw('COUNT(enrolled_students.id) as total_students')
                                 )
+                                ->where('school_year_id', '=', $schoolYearDetails->id)
                                 ->groupBy('enrolled_students.date_enrolled', 'course_id', 'course_name_abbreviation'); // Group by date and course
                         }]);
                     },
@@ -340,7 +342,7 @@ class SchoolYearController extends Controller
                             ->join('enrolled_students', 'year_section.id',  '=',  'enrolled_students.year_section_id');
                     },
                 ])
-                ->with(['YearSection' => function ($query) {
+                ->with(['YearSection' => function ($query) use ($schoolYearDetails) {
                     $query->join('enrolled_students', 'year_section.id', '=', 'enrolled_students.year_section_id')
                         ->join('course', 'course.id', '=', 'year_section.course_id')
                         ->select(
@@ -349,6 +351,7 @@ class SchoolYearController extends Controller
                             'course_name_abbreviation',
                             DB::raw('COUNT(enrolled_students.id) as total_students')
                         )
+                        ->where('school_year_id', '=', $schoolYearDetails->id)
                         ->groupBy('enrolled_students.date_enrolled', 'course_id', 'course_name_abbreviation'); // Group by date and course
                 }])
                 ->get();
@@ -390,39 +393,38 @@ class SchoolYearController extends Controller
             ->first()->id;
 
         return Room::select('rooms.id', 'room_name')
-        ->with(['Schedules' => function ($query) use ($schoolYearId) {
-            $query->select(
-                'day',
-                'descriptive_title',
-                'end_time',
-                'faculty_id',
-                'year_section_subjects.id',
-                'room_id',
-                'start_time',
-                'subject_id',
-                'year_section_id',
-                'first_name',
-                'middle_name',
-                'last_name',
-                'class_code',
-                'school_year_id'
-            )
-                ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
-                ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
-                ->join('user_information', 'users.id', '=', 'user_information.user_id')
-                ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
-                ->where('school_year_id', '=', $schoolYearId);
-        }])
-        ->whereHas('Schedules', function ($query) use ($schoolYearId) {
-            $query->where('school_year_id', '=', $schoolYearId);
-        })
-        ->leftJoin('year_section_subjects', 'rooms.id', '=', 'year_section_subjects.room_id')
-        ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
-        ->join('course', 'course.id', '=', 'year_section.course_id')
-        ->where('course.department_id', '=', $departmentId)
-        ->groupBy('room_name', 'rooms.id')
-        ->get();
-
+            ->with(['Schedules' => function ($query) use ($schoolYearId) {
+                $query->select(
+                    'day',
+                    'descriptive_title',
+                    'end_time',
+                    'faculty_id',
+                    'year_section_subjects.id',
+                    'room_id',
+                    'start_time',
+                    'subject_id',
+                    'year_section_id',
+                    'first_name',
+                    'middle_name',
+                    'last_name',
+                    'class_code',
+                    'school_year_id'
+                )
+                    ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+                    ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
+                    ->join('user_information', 'users.id', '=', 'user_information.user_id')
+                    ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+                    ->where('school_year_id', '=', $schoolYearId);
+            }])
+            ->whereHas('Schedules', function ($query) use ($schoolYearId) {
+                $query->where('school_year_id', '=', $schoolYearId);
+            })
+            ->leftJoin('year_section_subjects', 'rooms.id', '=', 'year_section_subjects.room_id')
+            ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+            ->join('course', 'course.id', '=', 'year_section.course_id')
+            ->where('course.department_id', '=', $departmentId)
+            ->groupBy('room_name', 'rooms.id')
+            ->get();
     }
 
     public function getSchoolYearFacultySchedules($schoolYear, $semester)
@@ -452,5 +454,32 @@ class SchoolYearController extends Controller
             ->join('user_information', 'users.id', '=', 'user_information.user_id')
             ->where('department_id', '=', $departmentId)
             ->get();
+    }
+
+    public function downloadPromotionalReport(Request $request)
+    {
+        $promotionalReport = YearSection::select(
+            'course.course_name_abbreviation',
+            'year_level.year_level_name',
+            'users.user_id_no',
+            'user_information.last_name',
+            'user_information.first_name',
+            'user_information.middle_name',
+            'user_information.gender',
+            'subjects.subject_code',
+            'subjects.descriptive_title'
+        )
+            ->where('school_year_id', '=', $request->id)
+            ->join('year_level', 'year_level.id', '=', 'year_section.year_level_id')
+            ->join('course', 'course.id', '=', 'year_section.course_id')
+            ->join('year_section_subjects', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+            ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+            ->join('student_subjects', 'year_section_subjects.id', '=', 'student_subjects.year_section_subjects_id')
+            ->join('enrolled_students', 'enrolled_students.id', '=', 'student_subjects.enrolled_students_id')
+            ->join('users', 'users.id', '=', 'enrolled_students.student_id')
+            ->join('user_information', 'users.id', '=', 'user_information.user_id')
+            ->get();
+
+        return response(['message' => 'success', 'promotionalReport' => $promotionalReport]);
     }
 }

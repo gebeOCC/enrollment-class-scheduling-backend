@@ -87,6 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-school-year-faculty-schedules/{schoolYear}/{semester}', [SchoolYearController::class, 'getSchoolYearFacultySchedules']);
     Route::post('set-sy-default/{schoolYearid}', [SchoolYearController::class, 'setSyDefault']);
     Route::post('add-school-year', [SchoolYearController::class, 'addSchoolYear']);
+    Route::get('download-promotional-report', [SchoolYearController::class, 'downloadPromotionalReport']);
 
     // ENROLLMENT
     Route::get('enrollment/{courseid}', [EnrollmentCourseController::class, 'getYearLevelSections']);
