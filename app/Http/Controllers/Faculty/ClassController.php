@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Faculty;
 
 use App\Http\Controllers\Controller;
+use App\Models\EnrolledStudent;
 use Illuminate\Http\Request;
 use App\Models\YearSectionSubjects;
 use App\Models\SchoolYear;
+use App\Models\StudentAttendance;
 use App\Models\StudentSubject;
 use Illuminate\Support\Facades\DB;
 
@@ -119,5 +121,62 @@ class ClassController extends Controller
             ->get();
 
         return response(['classInfo' => $class, 'students' => $students]);
+    }
+
+    public function getClassId($hashedclassId)
+    {
+        $yearSectionSubject = YearSectionSubjects::where(DB::raw('SHA2(id, 256)'), '=', $hashedclassId)
+            ->first();
+
+        $classId = $yearSectionSubject ? $yearSectionSubject->id : null;
+
+        $class = YearSectionSubjects::select(
+            'year_section_subjects.id',
+            'start_time',
+            'end_time',
+            'day',
+            'room_id',
+            'subject_id',
+            'year_section_id',
+            'room_name',
+            'descriptive_title',
+            'subject_code',
+            'section',
+            'course_id',
+            'course_name_abbreviation',
+        )
+            ->join('rooms', 'rooms.id', '=', 'room_id')
+            ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+            ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+            ->join('course', 'course.id', '=', 'year_section.course_id')
+            ->where('year_section_subjects.id', '=', $classId)
+            ->first();
+
+        return response(['classInfo' => $class]);
+    }
+
+    public function getStudentAttendance($classId, $formattedDate)
+    {
+        return YearSectionSubjects::select(
+            'first_name',
+            'last_name',
+            'middle_name',
+            'attendance_status',
+            'student_attendance.id',
+            'attendance_status',
+            'enrolled_students.student_id',
+            'attendance_date'
+        )
+            ->where('year_section_subjects.id', '=', $classId)
+            ->join('student_subjects', 'year_section_subjects.id', '=', 'student_subjects.year_section_subjects_id')
+            ->join('enrolled_students', 'enrolled_students.id', '=', 'student_subjects.enrolled_students_id')
+            ->join('users', 'users.id', '=', 'enrolled_students.student_id')
+            ->join('user_information', 'users.id', '=', 'user_information.user_id')
+            ->leftJoin('student_attendance', function ($join) use ($formattedDate) {
+                $join->on('users.id', '=', 'student_attendance.student_id')
+                    ->where('attendance_date', $formattedDate);
+            })
+            ->orderBy('last_name', 'asc')
+            ->get();
     }
 }

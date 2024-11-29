@@ -51,4 +51,9 @@ class YearSectionSubjects extends Model
     {
         return $this->belongsTo(YearSection::class, 'year_section_id');
     }
+
+    public function StudentAttendance()
+    {
+        return $this->hasMany(StudentAttendance::class, 'year_section_subjects_id');
+    }
 }
