@@ -179,4 +179,89 @@ class ClassController extends Controller
             ->orderBy('last_name', 'asc')
             ->get();
     }
+
+    public function updateStudentAttendanceStatus($classId, $status, $student_id, $formattedDate, $id)
+    {
+        StudentAttendance::where('student_id', '=', $student_id)
+            ->where('year_section_subjects_id', '=', $classId)
+            ->where('attendance_date', '=', $formattedDate)
+            ->where('id', '=', $id)
+            ->update([
+                'attendance_status' => $status,
+            ]);
+
+        return response(['message' => 'success']);
+    }
+
+    public function createStudentAttendanceStatus($classId, $status, $student_id, $formattedDate)
+    {
+        $studentAttendance = StudentAttendance::where('student_id', '=', $student_id)
+            ->where('year_section_subjects_id', '=', $classId)
+            ->where('attendance_date', '=', $formattedDate)
+            ->first();
+
+        if ($studentAttendance) {
+            $studentAttendance->update([
+                'attendance_status' => $status,
+            ]);
+        } else {
+            StudentAttendance::create([
+                'year_section_subjects_id' => $classId,
+                'student_id' => $student_id,
+                'attendance_date' => $formattedDate,
+                'attendance_status' => $status,
+            ]);
+        }
+    }
+
+    public function getClassAttendanceStatusCount($classId)
+    {
+        return StudentAttendance::where('year_section_subjects_id', $classId)
+            ->select(
+                'attendance_date',
+                DB::raw('COUNT(CASE WHEN attendance_status = "Present" THEN 1 END) as present_count'),
+                DB::raw('COUNT(CASE WHEN attendance_status = "Absent" THEN 1 END) as absent_count'),
+                DB::raw('COUNT(CASE WHEN attendance_status = "Late" THEN 1 END) as late_count'),
+                DB::raw('COUNT(CASE WHEN attendance_status = "Excused" THEN 1 END) as excused_count')
+            )
+            ->groupBy('attendance_date')
+            ->orderBy('attendance_date')
+            ->get();
+    }
+
+    public function markAllStatus($id, $date, $status)
+    {
+        $students = StudentSubject::where('year_section_subjects_id', '=', $id)
+            ->join('enrolled_students', 'enrolled_students.id', '=', 'student_subjects.enrolled_students_id')
+            ->get();
+
+        foreach ($students as $student) {
+            $studentAttendance = StudentAttendance::where('student_id', '=', $student->student_id)
+                ->where('year_section_subjects_id', '=', $id)
+                ->where('attendance_date', '=', $date)
+                ->first();
+
+            if ($studentAttendance) {
+                $studentAttendance->update([
+                    'attendance_status' => $status,
+                ]);
+            } else {
+                StudentAttendance::create([
+                    'year_section_subjects_id' => $id,
+                    'student_id' => $student->student_id,
+                    'attendance_date' => $date,
+                    'attendance_status' => $status,
+                ]);
+            }
+        }
+
+        return response(['message' => 'success']);
+    }
+    
+    public function deleteAttendance($id, $date)
+    {
+        StudentAttendance::where('year_section_subjects_id', '=', $id)
+            ->where('attendance_date', '=', $date)
+            ->delete();
+    }
 }

@@ -107,17 +107,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-class-students/{classId}', [ClassController::class, 'getClassStudents']);
     Route::get('get-class-id/{classId}', [ClassController::class, 'getClassId']);
     Route::get('get-student-attendance/{classId}/{formattedDate}', [ClassController::class, 'getStudentAttendance']);
+    Route::post('update-student-attendance-status/{classId}/{status}/{student_id}/{formattedDate}/{id}', [ClassController::class, 'updateStudentAttendanceStatus']);
+    Route::post('create-student-attendance-status/{classId}/{status}/{student_id}/{formattedDate}', [ClassController::class, 'createStudentAttendanceStatus']);
+    Route::get('get-class-attendance-status-count/{classId}', [ClassController::class, 'getClassAttendanceStatusCount']);
+    Route::post('mark-all-attenance/{classId}/{date}/{status}', [ClassController::class, 'markAllStatus']);
+    Route::post('delete-attenance/{classId}/{date}', [ClassController::class, 'deleteAttendance']);
+
     Route::get('get-enrollment-record', [StudentClassController::class, 'getEnrollmentRecord']);
-    Route::post('update-student-attendance-status/{classId}/{status}/{student_id}/{formattedDate}/{id}', [StudentClassController::class, 'updateStudentAttendanceStatus']);
-    Route::post('create-student-attendance-status/{classId}/{status}/{student_id}/{formattedDate}', [StudentClassController::class, 'createStudentAttendanceStatus']);
-    Route::get('get-class-attendance-status-count/{classId}', [StudentClassController::class, 'getClassAttendanceStatusCount']);
 
     // PRE_ENROLLMENT
     Route::get('get-course-year-level-sujects/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getCourseYearLevelSujects']);
     Route::get('get-student-info-student-id-number/{studentId}', [PreEnrollmentController::class, 'getStudentInfoStudentIdNumber']);
     Route::get('get-enrollment-room-schedules', [EnrollmentController::class, 'getEnrollmentRoomSchedules']);
     Route::get('get-enrollment-faculty-schedules', [EnrollmentController::class, 'getEnrollmentFacultySchedules']);
-    
+
     // ENROLL STUDENT
     Route::get('get-year-level-section-sections/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getYearLevelSectionSections']);
     Route::get('get-year-level-section-section-subjects/{courseid}/{yearLevelNumber}/{section}', [EnrollmentController::class, 'getYearLevelSectionSectionSubjects']);
