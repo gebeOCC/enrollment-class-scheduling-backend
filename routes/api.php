@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
@@ -22,7 +23,9 @@ use App\Http\Controllers\Enrollment\EnrollmentController;
 use App\Http\Controllers\UserController;
 
 Route::post('/login', [AuthController::class, 'login']);
-
+Route::get('/search-account/{id}', [AccountController::class, 'searchAccount']);
+Route::post('/send-code-with-hash', [AccountController::class, 'sendCodeWithHash']);
+Route::get('/verify', [AccountController::class, 'verifyHash']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -112,6 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-class-attendance-status-count/{classId}', [ClassController::class, 'getClassAttendanceStatusCount']);
     Route::post('mark-all-attenance/{classId}/{date}/{status}', [ClassController::class, 'markAllStatus']);
     Route::post('delete-attenance/{classId}/{date}', [ClassController::class, 'deleteAttendance']);
+    Route::get('get-student-attendance-info/{classId}', [ClassController::class, 'getStudentAttendanceInfo']);
 
     Route::get('get-enrollment-record', [StudentClassController::class, 'getEnrollmentRecord']);
 

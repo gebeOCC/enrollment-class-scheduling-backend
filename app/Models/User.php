@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(YearSectionSubjects::class, 'faculty_id');
     }
+
+    public function StudentAttendance()
+    {
+        return $this->hasMany(StudentAttendance::class, 'student_id');
+    }
 }

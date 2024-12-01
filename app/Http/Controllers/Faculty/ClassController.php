@@ -9,6 +9,7 @@ use App\Models\YearSectionSubjects;
 use App\Models\SchoolYear;
 use App\Models\StudentAttendance;
 use App\Models\StudentSubject;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ClassController extends Controller
@@ -257,11 +258,41 @@ class ClassController extends Controller
 
         return response(['message' => 'success']);
     }
-    
+
     public function deleteAttendance($id, $date)
     {
         StudentAttendance::where('year_section_subjects_id', '=', $id)
             ->where('attendance_date', '=', $date)
             ->delete();
+    }
+
+    public function getStudentAttendanceInfo($id)
+    {
+
+        $dates = StudentAttendance::select('attendance_date')
+            ->where('year_section_subjects_id', '=', $id)
+            ->orderBy('attendance_date', 'ASC')
+            ->get();
+
+        $students = User::select('users.id', 'user_information.first_name', 'user_information.last_name', 'user_information.middle_name')
+            ->with('StudentAttendance')
+            ->join('enrolled_students', 'users.id', '=', 'enrolled_students.student_id')
+            ->join('student_subjects', 'enrolled_students.id', '=', 'student_subjects.enrolled_students_id')
+            ->join('user_information', 'users.id', '=', 'user_information.user_id')
+            ->where('student_subjects.year_section_subjects_id', '=', $id)
+            ->orderBy('user_information.last_name', 'ASC')
+            ->get();
+
+        //  StudentSubject::select('user_information.first_name', 'user_information.last_name', 'user_information.middle_name')
+        //     ->where('student_subjects.year_section_subjects_id', '=', $id)
+        //     ->join('enrolled_students', 'enrolled_students.id', '=', 'student_subjects.enrolled_students_id')
+        //     ->join('users', 'users.id', '=', 'enrolled_students.student_id')
+        //     ->join('user_information', 'users.id', '=', 'user_information.user_id')
+        //     ->with(['StudentAttendance' => function ($query) {
+        //         $query->where('student_id', 'users.id');
+        //     }])
+        //     ->get();
+
+        return response(['message' => 'success', 'dates' => $dates, 'students' => $students]);
     }
 }
