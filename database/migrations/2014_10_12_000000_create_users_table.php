@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('user_id_no')->unique()->nullable();
             $table->string('password');
             $table->enum('user_role', ['faculty', 'student', 'program_head', 'evaluator', 'registrar']);
+            $table->boolean('password_change')->nullable()->default(0);
             $table->rememberToken();
             $table->timestamps();
         });
