@@ -55,30 +55,36 @@ class AuthController extends Controller
         $userRole = $request->user()->user_role;
         $user = $request->user();
 
-        $today = Carbon::now();
-        $twoWeeksLater = Carbon::now()->addWeeks(2);
+        $today = Carbon::now(); // Get today's date
+        $twoWeeksBeforeToday = $today->copy()->subWeeks(2); // 2 weeks before today, stored separately
 
-        $enrollmentOngoing = SchoolYear::where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
+        // Check if enrollment preparation is within 2 weeks before today and today
+        $enrollmentPreparation = SchoolYear::whereDate('start_date', '>=', $twoWeeksBeforeToday->toDateString())
+            ->whereDate('start_date', '<=', $today->toDateString())
             ->exists();
 
-        $enrollmentPreparation = SchoolYear::whereDate('start_date', '<=', $twoWeeksLater)->exists();
+        // Check if enrollment is ongoing (start_date <= today <= end_date)
+        $enrollmentOngoing = SchoolYear::whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->exists();
 
         $schoolYear = [];
 
-        if ($enrollmentOngoing) {
-            $schoolYear = SchoolYear::select('start_date', 'end_date')
-                ->where('start_date', '<=', $today)
-                ->where('end_date', '>=', $today)
+        if ($enrollmentPreparation) {
+            // Get the first SchoolYear record that matches the enrollment preparation criteria
+            $schoolYear = SchoolYear::whereDate('start_date', '>=', $twoWeeksBeforeToday->toDateString())
+                ->whereDate('start_date', '<=', $today->toDateString())
                 ->first();
-        } elseif ($enrollmentPreparation) {
-            $schoolYear = SchoolYear::select('start_date', 'end_date')
-                ->whereDate('start_date', '<=', $twoWeeksLater)->first();
+        } elseif ($enrollmentOngoing) {
+            // Get the first SchoolYear record that matches the ongoing enrollment criteria
+            $schoolYear = SchoolYear::whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today)
+                ->first();
         }
 
         $courses = [];
 
-        if (($userRole == 'program_head' || $userRole == 'evaluator') && ($enrollmentOngoing || $enrollmentPreparation)) {
+        if (($userRole == 'program_head' || $userRole == 'evaluator') && ($enrollmentOngoing || $enrollmentPreparation) && ($enrollmentPreparation || $enrollmentOngoing)) {
             $courses = DB::table('course')
                 ->select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
                 ->join(
@@ -91,7 +97,7 @@ class AuthController extends Controller
                 ->join('users', 'faculty.faculty_id', '=', 'users.id')
                 ->where('users.id', '=', $user->id)
                 ->get();
-        } else if ($userRole == 'registrar') {
+        } else if ($userRole == 'registrar' && ($enrollmentPreparation || $enrollmentOngoing)) {
             $courses = Course::select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
                 ->get();
         }
@@ -108,6 +114,7 @@ class AuthController extends Controller
             'schoolYear' => $schoolYear,
             'firstName' => $firstName,
             'passwordChange' => $user->password_change,
+            'date' => $today,
         ]);
     }
 }
