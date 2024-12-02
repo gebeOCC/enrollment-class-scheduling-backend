@@ -58,46 +58,38 @@ class AuthController extends Controller
         $today = Carbon::now(); // Get today's date
         $twoWeeksBeforeToday = $today->copy()->subWeeks(2); // 2 weeks before today, stored separately
 
-        // Check if enrollment preparation is within 2 weeks before today and today
-        $enrollmentPreparation = SchoolYear::whereDate('start_date', '>=', $twoWeeksBeforeToday->toDateString())
-            ->whereDate('start_date', '<=', $today->toDateString())
-            ->exists();
-
-        // Check if enrollment is ongoing (start_date <= today <= end_date)
-        $enrollmentOngoing = SchoolYear::whereDate('start_date', '<=', $today)
-            ->whereDate('end_date', '>=', $today)
-            ->exists();
+        // Get preparing or ongoing school year status and school year
+        $schoolYearStatus = getPreparingOrOngoingSchoolYear();
 
         $schoolYear = [];
+        $enrollmentPreparation = false;
+        $enrollmentOngoing = false;
 
-        if ($enrollmentPreparation) {
-            // Get the first SchoolYear record that matches the enrollment preparation criteria
-            $schoolYear = SchoolYear::whereDate('start_date', '>=', $twoWeeksBeforeToday->toDateString())
-                ->whereDate('start_date', '<=', $today->toDateString())
-                ->first();
-        } elseif ($enrollmentOngoing) {
-            // Get the first SchoolYear record that matches the ongoing enrollment criteria
-            $schoolYear = SchoolYear::whereDate('start_date', '<=', $today)
-                ->whereDate('end_date', '>=', $today)
-                ->first();
+        if ($schoolYearStatus['status'] && $schoolYearStatus['school_year']) {
+            // If the status is true (either preparing or ongoing), assign the school year
+            $schoolYear = $schoolYearStatus['school_year'];
+
+            // Set flags for enrollment preparation and ongoing based on the status
+            if ($schoolYearStatus['status'] == 'preparing') {
+                $enrollmentPreparation = true;
+            } elseif ($schoolYearStatus['status'] == 'ongoing') {
+                $enrollmentOngoing = true;
+            }
         }
 
         $courses = [];
 
-        if (($userRole == 'program_head' || $userRole == 'evaluator') && ($enrollmentOngoing || $enrollmentPreparation) && ($enrollmentPreparation || $enrollmentOngoing)) {
+        if (($userRole == 'program_head' || $userRole == 'evaluator') && ($enrollmentOngoing || $enrollmentPreparation)) {
+            // Fetch courses for program_head or evaluator role when enrollment is preparing or ongoing
             $courses = DB::table('course')
                 ->select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
-                ->join(
-                    'department',
-                    'course.department_id',
-                    '=',
-                    'department.id'
-                )
+                ->join('department', 'course.department_id', '=', 'department.id')
                 ->join('faculty', 'faculty.department_id', '=', 'department.id')
                 ->join('users', 'faculty.faculty_id', '=', 'users.id')
                 ->where('users.id', '=', $user->id)
                 ->get();
-        } else if ($userRole == 'registrar' && ($enrollmentPreparation || $enrollmentOngoing)) {
+        } elseif ($userRole == 'registrar' && ($enrollmentPreparation || $enrollmentOngoing)) {
+            // Fetch all courses for registrar when enrollment is preparing or ongoing
             $courses = Course::select(DB::raw("MD5(course.id) as hashed_course_id, course_name, course_name_abbreviation"))
                 ->get();
         }

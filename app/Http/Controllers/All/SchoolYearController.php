@@ -49,6 +49,9 @@ class SchoolYearController extends Controller
         $today = Carbon::now();
         $twoWeeksLater = Carbon::now()->addWeeks(2);
 
+        $today = Carbon::now()->toDateString(); // Get today's date in 'YYYY-MM-DD' format
+        $twoWeeksAfterToday = Carbon::now()->addWeeks(2)->toDateString(); // 2 weeks after today in 'YYYY-MM-DD' format
+
         $schoolYear = SchoolYear::select(
             'semester_id',
             'start_year',
@@ -58,15 +61,15 @@ class SchoolYearController extends Controller
             'is_current',
             'semester_name',
             DB::raw("CASE 
-                    WHEN '$today' BETWEEN start_date AND end_date 
-                    THEN true 
-                    ELSE false 
-                 END as enrollment_ongoing"),
+            WHEN '$today' BETWEEN start_date AND end_date 
+            THEN true 
+            ELSE false 
+         END as enrollment_ongoing"),
             DB::raw("CASE 
-                    WHEN '$twoWeeksLater' >= start_date
-                    THEN true 
-                    ELSE false 
-                 END as preparation"),
+            WHEN '$today' >= start_date AND '$today' <= '$twoWeeksAfterToday'
+            THEN true 
+            ELSE false 
+         END as preparation")
         )
             ->join('semesters', 'school_years.semester_id', '=', 'semesters.id')
             ->orderBy('school_years.id', 'desc')
