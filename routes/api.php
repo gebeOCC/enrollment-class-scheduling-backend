@@ -23,9 +23,6 @@ use App\Http\Controllers\Enrollment\EnrollmentController;
 use App\Http\Controllers\UserController;
 
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/search-account/{id}', [AccountController::class, 'searchAccount']);
-Route::post('/send-code-with-hash', [AccountController::class, 'sendCodeWithHash']);
-Route::get('/verify', [AccountController::class, 'verifyHash']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -101,8 +98,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-room-time/{id}/{day}', [EnrollmentCourseController::class, 'getRoomTime']);
     Route::get('get-instructor-time/{id}/{day}', [EnrollmentCourseController::class, 'getInstructorTime']);
     Route::post('add-class/{yearSectionId}', [EnrollmentCourseController::class, 'addClass']);
+    Route::post('delete-class', [EnrollmentCourseController::class, 'deleteClass']);
+    Route::post('delete-secondary-class', [EnrollmentCourseController::class, 'deleteSecondaryClass']);
+    Route::post('add-secondary-class/{classId}', [EnrollmentCourseController::class, 'addSecondaryClass']);
     Route::get('get-year-section-id', [EnrollmentCourseController::class, 'getYearSectionId']);
     Route::post('update-class', [EnrollmentCourseController::class, 'updateClass']);
+    Route::post('update-secondary-class', [EnrollmentCourseController::class, 'updateSecondaryClass']);
 
     // CLASSES
     Route::get('get-faculty-classes', [ClassController::class, 'getFacultyClasses']);

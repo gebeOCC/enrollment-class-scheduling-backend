@@ -31,28 +31,11 @@ class EnrollmentController extends Controller
             ->where(DB::raw('MD5(id)'), '=', $courseid)
             ->first();
 
-        $today = Carbon::now();
-        $twoWeeksLater = Carbon::now()->addWeeks(2);
-
-        // Attempt to find the current school year
-        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
-            ->first();
-
-        if ($currentSchoolYearenrollment) {
-            $schoolYearId = $currentSchoolYearenrollment->id;
-        } else {
-            // If no current school year is found, check for one starting within the next two weeks
-            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
-                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
-                ->first();
-
-            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
-        }
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
 
         $yearSectionId = YearSection::where('course_id', '=', $course->id)
             ->where('year_level_id', '=', $yearLevelNumber)
-            ->where('school_year_id', '=', $schoolYearId)
+            ->where('school_year_id', '=', $schoolYear->id)
             ->where('section', '=', $section)->first()->id;
 
         $classes = YearSectionSubjects::select(
@@ -70,8 +53,10 @@ class EnrollmentController extends Controller
             'descriptive_title',
             'credit_units',
         )
+            ->with('SubjectSecondarySchedule')
             ->join('subjects', 'subjects.id', '=', 'subject_id')
             ->where('year_section_id', '=', $yearSectionId)
+            ->orderBy('class_code', 'asc')
             ->get();
 
         $studentType = StudentType::select('id', 'student_type_name')
@@ -87,24 +72,7 @@ class EnrollmentController extends Controller
 
     public function getClasses($subjectCode)
     {
-        $today = Carbon::now();
-        $twoWeeksLater = Carbon::now()->addWeeks(2);
-
-        // Attempt to find the current school year
-        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
-            ->first();
-
-        if ($currentSchoolYearenrollment) {
-            $schoolYearId = $currentSchoolYearenrollment->id;
-        } else {
-            // If no current school year is found, check for one starting within the next two weeks
-            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
-                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
-                ->first();
-
-            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
-        }
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
 
         $subject = Subject::where('subject_code', '=', $subjectCode)->first();
 
@@ -129,10 +97,11 @@ class EnrollmentController extends Controller
             'credit_units',
             'school_year_id',
         )
+            ->with('SubjectSecondarySchedule')
             ->join('subjects', 'subjects.id', '=', 'subject_id')
             ->join('year_section', 'year_section.id', '=', 'year_section_id')
             ->where('subject_id', '=', $subject->id)
-            ->where('school_year_id', '=', $schoolYearId)
+            ->where('school_year_id', '=', $schoolYear->id)
             ->get();
 
         return response([

@@ -56,4 +56,9 @@ class YearSectionSubjects extends Model
     {
         return $this->hasMany(StudentAttendance::class, 'year_section_subjects_id');
     }
+
+    public function SubjectSecondarySchedule()
+    {
+        return $this->hasOne(SubjectSecondarySchedule::class, 'year_section_subjects_id');
+    }
 }

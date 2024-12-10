@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('student_attendance', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('year_section_subjects_id');
-            $table->foreign('year_section_subjects_id')->references('id')->on('subjects')->onDelete('restrict');
+            $table->foreign('year_section_subjects_id')->references('id')->on('year_section_subjects')->onDelete('restrict');
             $table->unsignedBigInteger('student_id');
             $table->foreign('student_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('attendance_date');

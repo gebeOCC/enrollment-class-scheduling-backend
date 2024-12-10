@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Faculty;
 use App\Models\Room;
 use App\Models\SchoolYear;
+use App\Models\SubjectSecondarySchedule;
 use App\Models\User;
 use App\Models\YearLevel;
 use App\Models\YearSection;
@@ -216,6 +217,33 @@ class EnrollmentCourseController extends Controller
         return response(['message' => 'success']);
     }
 
+    public function deleteClass(Request $request)
+    {
+        YearSectionSubjects::where('id', '=', $request->id)
+            ->delete();
+        return response(['message' => 'success']);
+    }
+
+    public function deleteSecondaryClass(Request $request)
+    {
+        SubjectSecondarySchedule::where('id', '=', $request->id)
+            ->delete();
+        return response(['message' => 'success']);
+    }
+
+    public function addSecondaryClass($classId, Request $request)
+    {
+        SubjectSecondarySchedule::create([
+            'year_section_subjects_id' => $classId,
+            'room_id' => $request->room_id,
+            'day' => $request->day,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+        ]);
+
+        return response(['message' => 'success']);
+    }
+
     public function updateClass(Request $request)
     {
 
@@ -279,11 +307,33 @@ class EnrollmentCourseController extends Controller
             return response()->json(['error' => 'Year section not found'], 404);
         }
 
-        $classes = YearSectionSubjects::select('year_section_subjects.id', 'class_code', 'year_section_subjects.subject_id', 'day', 'start_time', 'end_time', 'room_id', 'faculty_id', 'subject_code', 'descriptive_title', 'first_name', 'last_name', 'room_name', 'year_section_id')
+        $classes = YearSectionSubjects::select(
+            'lecture_hours',
+            'laboratory_hours',
+            'year_section_subjects.id',
+            'class_code',
+            'year_section_subjects.subject_id',
+            'day',
+            'start_time',
+            'end_time',
+            'room_id',
+            'faculty_id',
+            'subject_code',
+            'descriptive_title',
+            'first_name',
+            'last_name',
+            'room_name',
+            'year_section_id'
+        )
             ->join('user_information', 'year_section_subjects.faculty_id', '=', 'user_information.user_id')
             ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
             ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
+            ->with(['SubjectSecondarySchedule' => function ($query) {
+                $query->join('rooms', 'rooms.id', '=', 'subject_secondary_schedule.room_id')
+                    ->select('subject_secondary_schedule.*', 'rooms.room_name');
+            }])
             ->where('year_section_id', '=', $yearSectionId)
+            ->orderBy('class_code', 'asc')
             ->get();
 
         return response(['classes' => $classes, 'yearSectionId' => $yearSectionId]);
@@ -291,17 +341,77 @@ class EnrollmentCourseController extends Controller
 
     public function getRoomTime($roomId, $day)
     {
-        return YearSectionSubjects::select('id', 'start_time', 'end_time')
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
+
+        $secondarySchedule =  SubjectSecondarySchedule::select(
+            'subject_secondary_schedule.year_section_subjects_id',
+            'subject_secondary_schedule.id',
+            'subject_secondary_schedule.start_time',
+            'subject_secondary_schedule.end_time',
+            'subject_secondary_schedule.day'
+        )
+            ->join('year_section_subjects', 'year_section_subjects.id', '=', 'subject_secondary_schedule.year_section_subjects_id')
+            ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+            ->where('school_year_id', '=', $schoolYear->id)
+            ->where('subject_secondary_schedule.room_id', '=', $roomId)
+            ->where('subject_secondary_schedule.day', '=', $day)
+            ->get();
+
+        $mainSchedule = YearSectionSubjects::select('id', 'start_time', 'end_time', 'day')
             ->where('room_id', '=', $roomId)
             ->where('day', '=', $day)
             ->get();
+
+        $combinedSchedule = $mainSchedule->merge($secondarySchedule);
+
+        return response($combinedSchedule);
     }
 
     public function getInstructorTime($instructorId, $day)
     {
-        return YearSectionSubjects::select('id', 'start_time', 'end_time')
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
+
+        $secondarySchedule = SubjectSecondarySchedule::select(
+            'subject_secondary_schedule.year_section_subjects_id',
+            'subject_secondary_schedule.id',
+            'subject_secondary_schedule.start_time',
+            'subject_secondary_schedule.end_time',
+            'subject_secondary_schedule.day'
+        )
+            ->join('year_section_subjects', 'year_section_subjects.id', '=', 'subject_secondary_schedule.year_section_subjects_id')
+            ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+            ->where('school_year_id', '=', $schoolYear->id)
+            ->where('faculty_id', '=', $instructorId)
+            ->where('subject_secondary_schedule.day', '=', $day)
+            ->get();
+
+        $mainSchedule = YearSectionSubjects::select(
+            'year_section_subjects.id',
+            'start_time',
+            'end_time',
+            'day'
+        )
+            ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+            ->where('school_year_id', '=', $schoolYear->id)
             ->where('faculty_id', '=', $instructorId)
             ->where('day', '=', $day)
             ->get();
+
+        $combinedSchedule = $mainSchedule->merge($secondarySchedule);
+
+        return response($combinedSchedule);
+    }
+
+    public function updateSecondaryClass(Request $request)
+    {
+        SubjectSecondarySchedule::where('id', $request->id)
+            ->update([
+                'room_id' => $request->room_id,
+                'day' => $request->day,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+            ]);
+
+        return response(['message' => 'success']);
     }
 }

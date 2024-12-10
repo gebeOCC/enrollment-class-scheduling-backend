@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('enrolled_students_id');
             $table->foreign('enrolled_students_id')->references('id')->on('enrolled_students')->onDelete('restrict');
             $table->unsignedBigInteger('year_section_subjects_id');
-            $table->foreign('year_section_subjects_id')->references('id')->on('subjects')->onDelete('restrict');
+            $table->foreign('year_section_subjects_id')->references('id')->on('year_section_subjects')->onDelete('restrict');
             $table->timestamps();
         });
     }
