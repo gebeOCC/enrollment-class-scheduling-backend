@@ -19,4 +19,9 @@ class Room extends Model
     {
         return $this->hasMany(YearSectionSubjects::class, 'room_id');
     }
+
+    public function SecondarySchedules()
+    {
+        return $this->hasMany(SubjectSecondarySchedule::class, 'room_id');
+    }
 }

@@ -325,34 +325,61 @@ class EnrollmentController extends Controller
 
         $departmentId = Faculty::where('faculty_id', '=', $user->id)->first()->department_id;
 
-        $today = Carbon::now();
-        $twoWeeksLater = Carbon::now()->addWeeks(2);
-
-        // Attempt to find the current school year
-        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
-            ->first();
-
-        if ($currentSchoolYearenrollment) {
-            $schoolYearId = $currentSchoolYearenrollment->id;
-        } else {
-            // If no current school year is found, check for one starting within the next two weeks
-            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
-                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
-                ->first();
-
-            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
-        }
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
 
         return Room::select('rooms.id', 'room_name')
             ->where('department_id', '=', $departmentId)
-            ->with(['Schedules' => function ($query) use ($schoolYearId) {
-                $query->select('day', 'descriptive_title', 'end_time', 'faculty_id', 'year_section_subjects.id', 'room_id', 'start_time', 'subject_id', 'year_section_id', 'first_name', 'middle_name', 'last_name', 'class_code', 'school_year_id')
+            ->with(['Schedules' => function ($query) use ($schoolYear) {
+                // Primary schedules query
+                $query->select(
+                    'day',
+                    'descriptive_title',
+                    'end_time',
+                    'faculty_id',
+                    'year_section_subjects.id',
+                    'room_id',
+                    'start_time',
+                    'subject_id',
+                    'year_section_id',
+                    'first_name',
+                    'middle_name',
+                    'last_name',
+                    'class_code',
+                    'school_year_id'
+                )
                     ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
                     ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
                     ->join('user_information', 'users.id', '=', 'user_information.user_id')
                     ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
-                    ->where('school_year_id', '=', $schoolYearId);
+                    ->where('school_year_id', '=', $schoolYear->id);
+
+                // Secondary schedules query
+                $secondarySchedules = DB::table('subject_secondary_schedule')
+                    ->select(
+                        'subject_secondary_schedule.day',
+                        'descriptive_title',
+                        'subject_secondary_schedule.end_time',
+                        'faculty_id',
+                        'year_section_subjects.id',
+                        'subject_secondary_schedule.room_id', // Correct room_id for secondary schedules
+                        'subject_secondary_schedule.start_time',
+                        'subject_id',
+                        'year_section_id',
+                        'first_name',
+                        'middle_name',
+                        'last_name',
+                        'class_code',
+                        'school_year_id'
+                    )
+                    ->join('year_section_subjects', 'year_section_subjects.id', '=', 'subject_secondary_schedule.year_section_subjects_id') // Corrected join condition
+                    ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+                    ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
+                    ->join('user_information', 'users.id', '=', 'user_information.user_id')
+                    ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+                    ->where('school_year_id', '=', $schoolYear->id);
+
+                // Combine primary and secondary schedules using union
+                $query->union($secondarySchedules);
             }])
             ->get();
     }
