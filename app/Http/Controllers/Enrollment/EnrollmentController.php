@@ -390,32 +390,16 @@ class EnrollmentController extends Controller
 
         $departmentId = Faculty::where('faculty_id', '=', $user->id)->first()->department_id;
 
-        $today = Carbon::now();
-        $twoWeeksLater = Carbon::now()->addWeeks(2);
-
-        // Attempt to find the current school year
-        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
-            ->first();
-
-        if ($currentSchoolYearenrollment) {
-            $schoolYearId = $currentSchoolYearenrollment->id;
-        } else {
-            // If no current school year is found, check for one starting within the next two weeks
-            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
-                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
-                ->first();
-
-            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
-        }
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
 
         return User::select('users.id', 'faculty_id', 'first_name', 'middle_name', 'last_name', 'active')
-            ->with(['Schedules' => function ($query) use ($schoolYearId) {
+            ->with(['Schedules' => function ($query) use ($schoolYear) {
                 $query->select('room_name', 'day', 'descriptive_title', 'end_time', 'faculty_id', 'year_section_subjects.id', 'room_id', 'start_time', 'subject_id', 'year_section_id', 'class_code', 'school_year_id')
                     ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
                     ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
                     ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
-                    ->where('school_year_id', '=', $schoolYearId);
+                    ->with('SubjectSecondarySchedule.Room')
+                    ->where('school_year_id', '=', $schoolYear->id);
             }])
             ->join('faculty', 'users.id', '=', 'faculty.faculty_id')
             ->join('user_information', 'users.id', '=', 'user_information.user_id')

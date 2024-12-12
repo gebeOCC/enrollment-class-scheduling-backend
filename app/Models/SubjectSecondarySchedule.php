@@ -17,4 +17,9 @@ class SubjectSecondarySchedule extends Model
         'start_time',
         'end_time',
     ];
+
+    public function Room()
+    {
+        return $this->belongsTo (Room::class, 'room_id');
+    }
 }
