@@ -120,6 +120,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('get-enrollment-record', [StudentClassController::class, 'getEnrollmentRecord']);
 
+    // C.ASS SCHEDULING
+    Route::get('get-enrollment-subjects-schedule', [EnrollmentController::class, 'getEnrollmentSubjectsSchedule']);
+    
     // PRE_ENROLLMENT
     Route::get('get-course-year-level-sujects/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getCourseYearLevelSujects']);
     Route::get('get-student-info-student-id-number/{studentId}', [PreEnrollmentController::class, 'getStudentInfoStudentIdNumber']);

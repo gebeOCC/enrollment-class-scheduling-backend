@@ -325,11 +325,11 @@ class EnrollmentCourseController extends Controller
             'room_name',
             'year_section_id'
         )
-            ->join('user_information', 'year_section_subjects.faculty_id', '=', 'user_information.user_id')
-            ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
-            ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
+            ->leftJoin('user_information', 'year_section_subjects.faculty_id', '=', 'user_information.user_id')
+            ->leftJoin('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+            ->leftJoin('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
             ->with(['SubjectSecondarySchedule' => function ($query) {
-                $query->join('rooms', 'rooms.id', '=', 'subject_secondary_schedule.room_id')
+                $query->leftJoin('rooms', 'rooms.id', '=', 'subject_secondary_schedule.room_id')
                     ->select('subject_secondary_schedule.*', 'rooms.room_name');
             }])
             ->where('year_section_id', '=', $yearSectionId)

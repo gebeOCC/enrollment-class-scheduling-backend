@@ -250,6 +250,7 @@ class EnrollmentController extends Controller
                 'StudentSubject.YearSectionSubjects.Subject',
                 'StudentSubject.YearSectionSubjects.Instructor.InstructorInformation',
                 'StudentSubject.YearSectionSubjects.Room',
+                'StudentSubject.YearSectionSubjects.SubjectSecondarySchedule.Room',
                 'Student.StudentInformation'
             )
             ->where('student_id', '=', $studentId)
@@ -263,24 +264,7 @@ class EnrollmentController extends Controller
         $course = Course::where(DB::raw('MD5(id)'), '=', $courseid)
             ->first();
 
-        $today = Carbon::now();
-        $twoWeeksLater = Carbon::now()->addWeeks(2);
-
-        // Attempt to find the current school year
-        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
-            ->first();
-
-        if ($currentSchoolYearenrollment) {
-            $schoolYearId = $currentSchoolYearenrollment->id;
-        } else {
-            // If no current school year is found, check for one starting within the next two weeks
-            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
-                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
-                ->first();
-
-            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
-        }
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
 
         $studentInfo = User::select('users.id', 'user_id_no', 'first_name', 'middle_name', 'last_name')
             ->where('user_id_no', '=', $studentid)
@@ -290,12 +274,20 @@ class EnrollmentController extends Controller
         $studentEnrolled = EnrolledStudent::select('enrolled_students.id')
             ->join('year_section', 'enrolled_students.year_section_id', '=', 'year_section.id')
             ->where('student_id', '=', $studentInfo->id)
-            ->where('year_section.school_year_id', '=', $schoolYearId)
+            ->where('year_section.school_year_id', '=', $schoolYear->id)
             ->first();
 
-        $classes = StudentSubject::select('student_subjects.id', 'subject_id', 'class_code', 'subject_code', 'descriptive_title', 'day', 'start_time', 'end_time', 'credit_units')
+        // $classes = YearSectionSubjects::select('student_subjects.id', '', 'subject_id', 'class_code', 'subject_code', 'descriptive_title', 'day', 'start_time', 'end_time', 'credit_units')
+        //     ->join('student_subjects', 'year_section_subjects.id', '=', 'student_subjects.year_section_subjects_id')
+        //     ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+        //     ->with('SubjectSecondarySchedule')
+        //     ->where('enrolled_students_id', '=', $studentEnrolled->id)
+        //     ->get();
+
+        $classes = StudentSubject::select('student_subjects.id', 'enrolled_students_id', 'year_section_subjects_id')
             ->join('year_section_subjects', 'year_section_subjects.id', '=', 'student_subjects.year_section_subjects_id')
             ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id',)
+            ->with('YearSectionSubjects.Subject', 'YearSectionSubjects.SubjectSecondarySchedule')
             ->where('enrolled_students_id', '=', $studentEnrolled->id)
             ->get();
 
@@ -405,6 +397,50 @@ class EnrollmentController extends Controller
             ->join('user_information', 'users.id', '=', 'user_information.user_id')
             ->where('department_id', '=', $departmentId)
             ->where('active', '=', 1)
+            ->get();
+    }
+
+    public function getEnrollmentSubjectsSchedule()
+    {
+        $user = Auth::user();
+
+        $departmentId = Faculty::where('faculty_id', '=', $user->id)->first()->department_id;
+
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
+
+        return Subject::select('subjects.id', 'subject_code', 'descriptive_title')
+            ->with(['Schedules' => function ($query) use ($schoolYear) {
+                $query->select(
+                    'room_name',
+                    'day',
+                    'descriptive_title',
+                    'end_time',
+                    'faculty_id',
+                    'year_section_subjects.id',
+                    'room_id',
+                    'start_time',
+                    'subject_id',
+                    'year_section_id',
+                    'class_code',
+                    'school_year_id',
+                    'first_name',
+                    'middle_name',
+                    'last_name',
+                )
+                    ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+                    ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
+                    ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+                    ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
+                    ->join('user_information', 'users.id', '=', 'user_information.user_id')
+                    ->with('SubjectSecondarySchedule.Room')
+                    ->where('school_year_id', '=', $schoolYear->id);
+            }])
+            ->distinct()
+            ->join('year_section_subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
+            ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
+            ->join('course', 'course.id', '=', 'year_section.course_id')
+            ->where('course.department_id', '=', $departmentId)
+            ->where('year_section.school_year_id', '=', $schoolYear->id)
             ->get();
     }
 }

@@ -17,4 +17,9 @@ class Subject extends Model
         'lecture_hours',
         'laboratory_hours',
     ];
+
+    public function Schedules()
+    {
+        return $this->hasMany(YearSectionSubjects::class, 'subject_id');
+    }
 }

@@ -21,7 +21,7 @@ class YearSectionSubjects extends Model
         'end_time',
     ];
 
-    public function Subject()
+        public function Subject()
     {
         return $this->belongsTo(Subject::class, 'subject_id');
     }
@@ -30,7 +30,6 @@ class YearSectionSubjects extends Model
     {
         return $this->belongsTo(User::class, 'faculty_id');
     }
-
 
     public function Instructor()
     {
