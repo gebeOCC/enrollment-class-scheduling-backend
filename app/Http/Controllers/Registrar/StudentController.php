@@ -104,7 +104,7 @@ class StudentController extends Controller
         // Check if the user ID already exists
         $userIdExist = User::where('user_id_no', $request->user_id_no)->first();
         if ($userIdExist) {
-            return response(["message" => "User ID already exists"]);
+            return response(["message" => "User ID already exists", "user id" => $request->user_id_no]);
         }
 
         // Generate a random password
@@ -123,7 +123,7 @@ class StudentController extends Controller
         if ($birthday) {
             // Check if the format is 'YYYY-MM-DD' or 'MONTH DD, YYYY'
             $isValidFormat = \DateTime::createFromFormat('Y-m-d', $birthday) ||
-            \DateTime::createFromFormat('F j, Y', $birthday);
+                \DateTime::createFromFormat('F j, Y', $birthday);
 
             // Set birthday to null if the format is invalid
             if (!$isValidFormat) {
@@ -154,7 +154,7 @@ class StudentController extends Controller
 
         sleep(1);
 
-        return response(["message" => "success"]);
+        return response(["message" => "success", 'id' => $request->user_id_no]);
     }
 
     function generateRandomPassword($length = 8)
