@@ -327,7 +327,7 @@ class EnrollmentController extends Controller
                     'day',
                     'descriptive_title',
                     'end_time',
-                    'faculty_id',
+                    'year_section_subjects.faculty_id',
                     'year_section_subjects.id',
                     'room_id',
                     'start_time',
@@ -351,7 +351,7 @@ class EnrollmentController extends Controller
                         'subject_secondary_schedule.day',
                         'descriptive_title',
                         'subject_secondary_schedule.end_time',
-                        'faculty_id',
+                        'year_section_subjects.faculty_id',
                         'year_section_subjects.id',
                         'subject_secondary_schedule.room_id', // Correct room_id for secondary schedules
                         'subject_secondary_schedule.start_time',
