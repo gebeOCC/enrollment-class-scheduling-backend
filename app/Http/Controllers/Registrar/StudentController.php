@@ -192,4 +192,22 @@ class StudentController extends Controller
     {
         return str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
     }
+
+    public function updateStudentInfo($id, Request $request)
+    {
+        UserInformation::where('user_id', '=', $id)
+            ->update([
+                'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
+                'last_name' => $request->last_name,
+                'gender' => $request->gender,
+                'birthday' => $request->birthday,
+                'contact_number' => $request->contact_number,
+                'email_address' => $request->email_address,
+                'present_address' => $request->present_address,
+                'zip_code' => $request->zip_code,
+            ]);
+
+        return response(['message' => 'success']);
+    }
 }

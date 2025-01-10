@@ -43,6 +43,7 @@ class StudentClassController extends Controller
                 'StudentSubject.YearSectionSubjects.Subject',
                 'StudentSubject.YearSectionSubjects.Instructor.InstructorInformation',
                 'StudentSubject.YearSectionSubjects.Room',
+                'StudentSubject.YearSectionSubjects.SubjectSecondarySchedule.Room',
                 'Student.StudentInformation'
             ])
             ->first();
@@ -76,6 +77,7 @@ class StudentClassController extends Controller
                 'StudentSubject.YearSectionSubjects.Subject',
                 'StudentSubject.YearSectionSubjects.Instructor.InstructorInformation',
                 'StudentSubject.YearSectionSubjects.Room',
+                'StudentSubject.YearSectionSubjects.SubjectSecondarySchedule.Room',
                 'Student.StudentInformation'
             )
             ->get();

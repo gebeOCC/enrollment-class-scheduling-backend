@@ -78,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('add-new-student', [StudentController::class, 'addNewStudent']);
     Route::post('import-students', [StudentController::class, 'importStudents']);
     Route::get('get-student-details/{id}', [StudentController::class, 'getStudentDetails']);
+    Route::post('update-student-info/{id}', [StudentController::class, 'updateStudentInfo']);
 
     // SCHOOL YEAR & SEMESTER
     Route::get('get-semesters', [SemesterController::class, 'getSemesters']);
@@ -120,9 +121,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('get-enrollment-record', [StudentClassController::class, 'getEnrollmentRecord']);
 
-    // C.ASS SCHEDULING
+    // CLASS SCHEDULING
     Route::get('get-enrollment-subjects-schedule', [EnrollmentController::class, 'getEnrollmentSubjectsSchedule']);
-    
+
     // PRE_ENROLLMENT
     Route::get('get-course-year-level-sujects/{courseId}/{yearLevelId}', [PreEnrollmentController::class, 'getCourseYearLevelSujects']);
     Route::get('get-student-info-student-id-number/{studentId}', [PreEnrollmentController::class, 'getStudentInfoStudentIdNumber']);
