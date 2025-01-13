@@ -381,7 +381,7 @@ class EnrollmentCourseController extends Controller
             ->join('year_section_subjects', 'year_section_subjects.id', '=', 'subject_secondary_schedule.year_section_subjects_id')
             ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
             ->where('school_year_id', '=', $schoolYear->id)
-            ->where('faculty_id', '=', $instructorId)
+            ->where('year_section_subjects.faculty_id', '=', $instructorId)
             ->where('subject_secondary_schedule.day', '=', $day)
             ->get();
 
@@ -393,7 +393,7 @@ class EnrollmentCourseController extends Controller
         )
             ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
             ->where('school_year_id', '=', $schoolYear->id)
-            ->where('faculty_id', '=', $instructorId)
+            ->where('year_section_subjects.faculty_id', '=', $instructorId)
             ->where('day', '=', $day)
             ->get();
 
