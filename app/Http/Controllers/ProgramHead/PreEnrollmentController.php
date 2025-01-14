@@ -55,14 +55,15 @@ class PreEnrollmentController extends Controller
     public function getStudentInfoStudentIdNumber($studentId)
     {
         $studentId = User::select('id')
-            ->where('user_id_no', '=', $studentId)
+            ->orWhere('user_id_no', 'like', '%' . $studentId)
             ->first();
 
         if (!$studentId) {
             return response(['message' => 'no user found']);
         }
 
-        $student = UserInformation::select('user_id', 'first_name', 'middle_name', 'last_name')
+        $student = UserInformation::select('user_id_no', 'user_id', 'first_name', 'middle_name', 'last_name')
+        ->join('users', 'users.id', '=', 'user_information.user_id')
             ->where('user_id', '=', $studentId->id)
             ->first();
 
