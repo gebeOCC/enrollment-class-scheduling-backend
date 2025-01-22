@@ -105,6 +105,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-year-section-id', [EnrollmentCourseController::class, 'getYearSectionId']);
     Route::post('update-class', [EnrollmentCourseController::class, 'updateClass']);
     Route::post('update-secondary-class', [EnrollmentCourseController::class, 'updateSecondaryClass']);
+    Route::post('move-student-year-section', [EnrollmentCourseController::class, 'moveStudentYearSection']);
 
     // CLASSES
     Route::get('get-faculty-classes', [ClassController::class, 'getFacultyClasses']);

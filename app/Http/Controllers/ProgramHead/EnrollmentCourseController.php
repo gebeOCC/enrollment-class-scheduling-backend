@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ProgramHead;
 
 use App\Http\Controllers\Controller;
+use App\Models\EnrolledStudent;
 use App\Models\Faculty;
 use App\Models\Room;
 use App\Models\SchoolYear;
@@ -411,6 +412,14 @@ class EnrollmentCourseController extends Controller
                 'start_time' => $request->start_time,
                 'end_time' => $request->end_time,
             ]);
+
+        return response(['message' => 'success']);
+    }
+
+    public function moveStudentYearSection(Request $request)
+    {
+        EnrolledStudent::where('id', '=', $request->student_id)
+            ->update(['year_section_id' => $request->year_section_id]);
 
         return response(['message' => 'success']);
     }

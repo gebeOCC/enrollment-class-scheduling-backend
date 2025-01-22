@@ -178,33 +178,20 @@ class EnrollmentController extends Controller
             ->where(DB::raw('MD5(id)'), '=', $courseid)
             ->first();
 
-        $today = Carbon::now();
-        $twoWeeksLater = Carbon::now()->addWeeks(2);
-
-        // Attempt to find the current school year
-        $currentSchoolYearenrollment = SchoolYear::where('start_date', '<=', $today)
-            ->where('end_date', '>=', $today)
-            ->first();
-
-        if ($currentSchoolYearenrollment) {
-            $schoolYearId = $currentSchoolYearenrollment->id;
-        } else {
-            // If no current school year is found, check for one starting within the next two weeks
-            $upcomingSchoolYear = SchoolYear::where('start_date', '<=', $twoWeeksLater)
-                ->orderBy('start_date', 'asc') // Optional: to get the earliest upcoming year
-                ->first();
-
-            $schoolYearId = $upcomingSchoolYear ? $upcomingSchoolYear->id : null;
-        }
+        $schoolYear = getPreparingOrOngoingSchoolYear()['school_year'];
 
         $yearSectionId = YearSection::where('course_id', '=', $course->id)
             ->where('year_level_id', '=', $yearLevelNumber)
-            ->where('school_year_id', '=', $schoolYearId)
+            ->where('school_year_id', '=', $schoolYear->id)
             ->where('section', '=', $section)->first()->id;
 
-        $students =  EnrolledStudent::where('year_section_id', '=', $yearSectionId)
-            ->with('User.UserInformation')
-            ->get();
+        $students = EnrolledStudent::select('enrolled_students.id', 'enrolled_students.student_id')
+        ->where('year_section_id', '=', $yearSectionId)
+        ->join('users', 'enrolled_students.student_id', '=', 'users.id') // Join with the 'users' table
+        ->join('user_information', 'users.id', '=', 'user_information.user_id') // Join with the 'user_informations' table
+        ->with('User.UserInformation') // Include the relationship
+        ->orderBy('user_information.last_name', 'asc') // Order by last_name descending
+        ->get();
 
         return response(['message' => 'success', 'students' => $students]);
     }
@@ -373,6 +360,7 @@ class EnrollmentController extends Controller
                 // Combine primary and secondary schedules using union
                 $query->union($secondarySchedules);
             }])
+            ->orderBy('room_name', 'asc')
             ->get();
     }
 
@@ -397,6 +385,7 @@ class EnrollmentController extends Controller
             ->join('user_information', 'users.id', '=', 'user_information.user_id')
             ->where('department_id', '=', $departmentId)
             ->where('active', '=', 1)
+            ->orderBy('last_name', 'asc')
             ->get();
     }
 
@@ -441,6 +430,7 @@ class EnrollmentController extends Controller
             ->join('course', 'course.id', '=', 'year_section.course_id')
             ->where('course.department_id', '=', $departmentId)
             ->where('year_section.school_year_id', '=', $schoolYear->id)
+            ->orderBy('descriptive_title', 'asc')
             ->get();
     }
 }
