@@ -20,6 +20,11 @@ class SubjectSecondarySchedule extends Model
 
     public function Room()
     {
-        return $this->belongsTo (Room::class, 'room_id');
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    public function YearSectionSubjects() 
+    {
+        return $this->belongsTo(YearSectionSubjects::class, 'year_section_subjects_id');
     }
 }
