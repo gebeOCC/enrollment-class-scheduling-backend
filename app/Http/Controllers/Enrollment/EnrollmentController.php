@@ -329,8 +329,8 @@ class EnrollmentController extends Controller
                     'school_year_id'
                 )
                     ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
-                    ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
-                    ->join('user_information', 'users.id', '=', 'user_information.user_id')
+                    ->leftjoin('users', 'users.id', '=', 'year_section_subjects.faculty_id')
+                    ->leftjoin('user_information', 'users.id', '=', 'user_information.user_id')
                     ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
                     ->where('school_year_id', '=', $schoolYear->id);
 
@@ -354,8 +354,8 @@ class EnrollmentController extends Controller
                     )
                     ->join('year_section_subjects', 'year_section_subjects.id', '=', 'subject_secondary_schedule.year_section_subjects_id') // Corrected join condition
                     ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
-                    ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
-                    ->join('user_information', 'users.id', '=', 'user_information.user_id')
+                    ->leftjoin('users', 'users.id', '=', 'year_section_subjects.faculty_id')
+                    ->leftjoin('user_information', 'users.id', '=', 'user_information.user_id')
                     ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
                     ->where('school_year_id', '=', $schoolYear->id);
 
@@ -378,7 +378,7 @@ class EnrollmentController extends Controller
             ->with(['Schedules' => function ($query) use ($schoolYear) {
                 $query->select('room_name', 'day', 'descriptive_title', 'end_time', 'faculty_id', 'year_section_subjects.id', 'room_id', 'start_time', 'subject_id', 'year_section_id', 'class_code', 'school_year_id')
                     ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
-                    ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
+                    ->leftjoin('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
                     ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
                     ->with(['SubjectSecondarySchedule' => function ($query) {
                         $query->select(
@@ -392,7 +392,7 @@ class EnrollmentController extends Controller
                             'end_time',
                             'room_name'
                         )
-                            ->join('rooms', 'rooms.id', '=', 'subject_secondary_schedule.room_id');
+                            ->leftjoin('rooms', 'rooms.id', '=', 'subject_secondary_schedule.room_id');
                     }])
                     ->withCount('SubjectEnrolledStudents as student_count')
                     ->where('school_year_id', '=', $schoolYear->id);
