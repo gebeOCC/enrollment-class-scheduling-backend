@@ -434,10 +434,10 @@ class EnrollmentController extends Controller
                 )
                     ->withCount('SubjectEnrolledStudents as student_count')
                     ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
-                    ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
+                    ->leftJoin('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
                     ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
-                    ->join('users', 'users.id', '=', 'year_section_subjects.faculty_id')
-                    ->join('user_information', 'users.id', '=', 'user_information.user_id')
+                    ->leftJoin('users', 'users.id', '=', 'year_section_subjects.faculty_id')
+                    ->leftJoin('user_information', 'users.id', '=', 'user_information.user_id')
                     ->with(['SubjectSecondarySchedule' => function ($query) {
                         $query->select(
                             'rooms.room_name',

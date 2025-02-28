@@ -51,7 +51,7 @@ class ClassController extends Controller
                 "SHA2(year_section_subjects.id, 256) as hashed_year_section_subject_id"
             )
             ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
-            ->join('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
+            ->leftjoin('rooms', 'rooms.id', '=', 'year_section_subjects.room_id')
             ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
             ->join('year_level', 'year_level.id', '=', 'year_section.year_level_id')
             ->join('course', 'course.id', '=', 'year_section.course_id')
@@ -146,7 +146,7 @@ class ClassController extends Controller
             'course_id',
             'course_name_abbreviation',
         )
-            ->join('rooms', 'rooms.id', '=', 'room_id')
+            ->leftjoin('rooms', 'rooms.id', '=', 'room_id')
             ->join('subjects', 'subjects.id', '=', 'year_section_subjects.subject_id')
             ->join('year_section', 'year_section.id', '=', 'year_section_subjects.year_section_id')
             ->join('course', 'course.id', '=', 'year_section.course_id')

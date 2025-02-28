@@ -72,7 +72,7 @@ class SchoolYearController extends Controller
          END as preparation")
         )
             ->join('semesters', 'school_years.semester_id', '=', 'semesters.id')
-            ->orderBy('school_years.id', 'desc')
+            ->orderBy('school_years.created_at', 'desc')
             ->get();
 
         $semesters = Semester::select('id', 'semester_name')->get();
